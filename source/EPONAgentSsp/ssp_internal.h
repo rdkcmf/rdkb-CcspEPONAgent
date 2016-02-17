@@ -42,10 +42,10 @@
 #define  CCSP_COMMON_COMPONENT_FREERESOURCES_PRIORITY_High  1
 #define  CCSP_COMMON_COMPONENT_FREERESOURCES_PRIORITY_Low   2
 
-#define  CCSP_COMPONENT_ID                             "com.arris.spvtg.ccsp.eponagent"
-#define  CCSP_COMPONENT_NAME                           "com.arris.spvtg.ccsp.eponagent"
+#define  CCSP_COMPONENT_ID                             "com.cisco.spvtg.ccsp.eponagent"
+#define  CCSP_COMPONENT_NAME                           "com.cisco.spvtg.ccsp.eponagent"
 #define  CCSP_COMPONENT_VERSION                        1
-#define  CCSP_COMPONENT_PATH                           "/com/arris/spvtg/ccsp/"
+#define  CCSP_COMPONENT_PATH                           "/com/cisco/spvtg/ccsp/"
 
 /**
  * @brief Defines component Structure

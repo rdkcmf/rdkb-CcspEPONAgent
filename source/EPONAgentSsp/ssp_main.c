@@ -48,6 +48,15 @@ char         g_Subsystem[32] = {0};
 
 int  cmd_dispatch(int  command)
 {
+    ULONG                           ulInsNumber        = 0;
+    parameterValStruct_t            val[3]             = {0};
+    char*                           pParamNames[]      = {"Device.optical.X_RDKCENTRAL-COM_DPoE."};
+    parameterValStruct_t**          ppReturnVal        = NULL;
+    parameterInfoStruct_t**         ppReturnValNames   = NULL;
+    parameterAttributeStruct_t**    ppReturnvalAttr    = NULL;
+    ULONG                           ulReturnValCount   = 0;
+    ULONG                           i                  = 0;
+
     switch ( command )
     {
         case    'e' :
@@ -80,6 +89,25 @@ int  cmd_dispatch(int  command)
             ssp_engage();
 
             break;
+
+        case    'r' :
+
+                CcspCcMbi_GetParameterValues
+                (
+                    DSLH_MPA_ACCESS_CONTROL_ACS,
+                    pParamNames,
+                    1,
+                    &ulReturnValCount,
+                    &ppReturnVal,
+                    NULL
+                );
+
+                for ( i = 0; i < ulReturnValCount; i++ )
+                {
+                    CcspTraceWarning(("Parameter %d name: %s value: %s \n", i+1, ppReturnVal[i]->parameterName, ppReturnVal[i]->parameterValue));
+                }
+
+                break;
 
         case    'm':
 
@@ -206,6 +234,38 @@ void sig_handler(int sig)
 
 }
 
+static int is_core_dump_opened(void)
+{
+    FILE *fp;
+    char path[256];
+    char line[1024];
+    char *start, *tok, *sp;
+#define TITLE   "Max core file size"
+
+    snprintf(path, sizeof(path), "/proc/%d/limits", getpid());
+    if ((fp = fopen(path, "rb")) == NULL)
+        return 0;
+
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        if ((start = strstr(line, TITLE)) == NULL)
+            continue;
+
+        start += strlen(TITLE);
+        if ((tok = strtok_r(start, " \t\r\n", &sp)) == NULL)
+            break;
+
+        fclose(fp);
+
+        if (strcmp(tok, "0") == 0)
+            return 0;
+        else
+            return 1;
+    }
+
+    fclose(fp);
+    return 0;
+}
+
 #endif
 
 int main(int argc, char* argv[])
@@ -214,6 +274,8 @@ int main(int argc, char* argv[])
     BOOL bRunAsDaemon = TRUE;
     int cmdChar = 0;
     int idx = 0;
+    char cmd[1024] = {0};
+    FILE *fd = NULL;
 
     extern ANSC_HANDLE bus_handle;
     char *subSys = NULL;
@@ -250,19 +312,40 @@ int main(int argc, char* argv[])
     if ( bRunAsDaemon )
         daemonize();
 
-    signal(SIGTERM, sig_handler);
-    signal(SIGINT, sig_handler);
-    /*signal(SIGCHLD, sig_handler);*/
-    signal(SIGUSR1, sig_handler);
-    signal(SIGUSR2, sig_handler);
+    /*This is used for ccsp recovery manager */
+    fd = fopen("/var/tmp/CcspEPONAgentSsp.pid", "w+");
+    if ( !fd )
+    {
+        CcspTraceWarning(("Create /var/tmp/CcspEPONAgentSsp.pid error. \n"));
+        return 1;
+    }
+    sprintf(cmd, "%d", getpid());
+    fputs(cmd, fd);
+    fclose(fd);
 
-    signal(SIGSEGV, sig_handler);
-    signal(SIGBUS, sig_handler);
-    signal(SIGKILL, sig_handler);
-    signal(SIGFPE, sig_handler);
-    signal(SIGILL, sig_handler);
-    signal(SIGQUIT, sig_handler);
-    signal(SIGHUP, sig_handler);
+    if (is_core_dump_opened())
+    {
+        signal(SIGUSR1, sig_handler);
+        CcspTraceWarning(("Core dump is opened, do not catch signal\n"));
+    }
+    else
+    {
+        CcspTraceWarning(("Core dump is NOT opened, backtrace if possible\n"));
+
+        signal(SIGTERM, sig_handler);
+        signal(SIGINT, sig_handler);
+        /*signal(SIGCHLD, sig_handler);*/
+        signal(SIGUSR1, sig_handler);
+        signal(SIGUSR2, sig_handler);
+
+        signal(SIGSEGV, sig_handler);
+        signal(SIGBUS, sig_handler);
+        signal(SIGKILL, sig_handler);
+        signal(SIGFPE, sig_handler);
+        signal(SIGILL, sig_handler);
+        signal(SIGQUIT, sig_handler);
+        signal(SIGHUP, sig_handler);
+    }
 
     cmd_dispatch('e');
 
