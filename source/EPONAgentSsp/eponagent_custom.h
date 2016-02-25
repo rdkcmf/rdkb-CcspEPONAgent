@@ -39,6 +39,6 @@
 /* TBD  Move to platform specific header file */
 #define  CCSP_PNM_BACKTRACE_FILE                    "/nvram/epon_agent_backtrace"
 
-#define  CCSP_DATAMODEL_XML_FILE                    "TR181-EPON.xml"
+#define  CCSP_DATAMODEL_XML_FILE                    "TR181-EPON.XML"
 
 #endif   /*_EPON_AGENT_CUSTOM_H_*/
