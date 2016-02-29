@@ -36,10 +36,13 @@
     <func_MemoryUsage>COSA_MemoryUsage</func_MemoryUsage>
     <func_MemoryTable>COSA_MemoryTable</func_MemoryTable>
   </library>
-
   <objects>
     <object>
-		<name>X_RDKCENTRAL-COM_DPoE</name>
+	<baseObjName>Device.Optical.</baseObjName>
+        <objectType>object</objectType>
+        <objects>
+            <object>
+		<name>DPoE</name>
 		<objectType>object</objectType>
 		<functions>
 			<func_GetParamBoolValue>DPoE_GetParamBoolValue</func_GetParamBoolValue>
@@ -54,7 +57,6 @@
 			<func_Commit>DPoE_Commit</func_Commit>
 			<func_Rollback>DPoE_Rollback</func_Rollback>
 		</functions>
-
 		<parameters>
 			<parameter>
 				<name>Mac_address</name>
@@ -105,7 +107,6 @@
 				<writable>true</writable>
 			</parameter>		
 		</parameters>
-
 		<objects>
 			<object>
 				<name>FirmwareInfo</name>
@@ -533,7 +534,8 @@
 			</object>
 
 		</objects>
-
+            </object>
+	</objects>
 
     </object>
 
