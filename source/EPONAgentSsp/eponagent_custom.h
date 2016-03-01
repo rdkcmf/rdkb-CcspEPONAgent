@@ -34,10 +34,10 @@
 
 #define  MESSAGE_BUS_CONFIG_FILE                    "msg_daemon.cfg"
 
-#define  CCSP_PNM_START_CFG_FILE                    "CcspEPON.cfg"
+#define  CCSP_EPON_START_CFG_FILE                    "CcspEPON.cfg"
 
 /* TBD  Move to platform specific header file */
-#define  CCSP_PNM_BACKTRACE_FILE                    "/nvram/epon_agent_backtrace"
+#define  CCSP_EPON_BACKTRACE_FILE                    "/nvram/epon_agent_backtrace"
 
 #define  CCSP_DATAMODEL_XML_FILE                    "TR181-EPON.XML"
 

@@ -43,6 +43,8 @@
 #include "stdlib.h"
 #include "ccsp_dm_api.h"
 
+PCCSP_COMPONENT_CFG gpEponStartCfg = NULL;
+
 extern char* pComponentName;
 char         g_Subsystem[32] = {0};
 
@@ -69,24 +71,24 @@ int  cmd_dispatch(int  command)
 
                 if ( g_Subsystem[0] != 0 )
                 {
-                    _ansc_sprintf(CName, "%s%s", g_Subsystem, CCSP_COMPONENT_ID);
+                    _ansc_sprintf(CName, "%s%s", g_Subsystem, gpEponStartCfg->ComponentId);
                 }
                 else
                 {
-                    _ansc_sprintf(CName, "%s", CCSP_COMPONENT_ID);
+                    _ansc_sprintf(CName, "%s", gpEponStartCfg->ComponentId);
                 }
 
                 ssp_Mbi_MessageBusEngage
                     (
                         CName,
                         CCSP_MSG_BUS_CFG,
-                        CCSP_COMPONENT_PATH
+                        gpEponStartCfg->DbusPath
                     );
             }
 #endif
 
-            ssp_create();
-            ssp_engage();
+            ssp_create(gpEponStartCfg);
+            ssp_engage(gpEponStartCfg);
 
             break;
 
@@ -123,7 +125,7 @@ int  cmd_dispatch(int  command)
 
         case    'c':
 
-                ssp_cancel();
+                ssp_cancel(gpEponStartCfg);
 
                 break;
 
@@ -281,6 +283,25 @@ int main(int argc, char* argv[])
     char *subSys = NULL;
     DmErr_t err;
 
+    /*
+     *  Load the start configuration
+     */
+    gpEponStartCfg = (PCCSP_COMPONENT_CFG)AnscAllocateMemory(sizeof(CCSP_COMPONENT_CFG));
+    
+    AnscSetTraceLevel(CCSP_TRACE_LEVEL_DEBUG);
+    //g_iTraceLevel = CCSP_TRACE_LEVEL_DEBUG;
+
+    if ( gpEponStartCfg )
+    {
+        CcspComponentLoadCfg(CCSP_EPON_START_CFG_FILE, gpEponStartCfg);
+    }
+    else
+    {
+        exit(1);
+    }
+    
+    /* Set the global pComponentName */
+    pComponentName = gpEponStartCfg->ComponentName;
 
     for (idx = 1; idx < argc; idx++)
     {
@@ -293,8 +314,6 @@ int main(int argc, char* argv[])
             bRunAsDaemon = FALSE;
         }
     }
-
-    pComponentName = CCSP_COMPONENT_NAME;
 
 #if  defined(_ANSC_WINDOWSNT)
 
@@ -389,7 +408,7 @@ int main(int argc, char* argv[])
     exit(1);
     }
 
-    ssp_cancel();
+    ssp_cancel(gpEponStartCfg);
 
     return 0;
 }

@@ -59,7 +59,10 @@ extern  ULONG                   g_ulAllocatedSizePeak;
  * @brief 
  * This function creates component object in the CR(Component Registrar).
  */
-ANSC_STATUS ssp_create()
+ANSC_STATUS ssp_create
+    (
+        PCCSP_COMPONENT_CFG         pStartCfg
+    )
 {
     /* Create component common data model object */
 
@@ -72,9 +75,9 @@ ANSC_STATUS ssp_create()
 
     ComponentCommonDmInit( g_pComponent_COMMON);
 
-     g_pComponent_COMMON->Name     = AnscCloneString(CCSP_COMPONENT_NAME);
+     g_pComponent_COMMON->Name     = AnscCloneString(pStartCfg->ComponentName);
      g_pComponent_COMMON->Version  = 1;
-     g_pComponent_COMMON->Author   = AnscCloneString("Your name");
+     g_pComponent_COMMON->Author   = AnscCloneString("Fiber Optics");
 
     /* Create ComponentCommonDatamodel interface*/
     if ( !pSsdCcdIf )
@@ -144,11 +147,15 @@ ANSC_STATUS ssp_create()
  * @brief 
  * This function establish connection from the component to the CR(Component Registrar).
  */
-ANSC_STATUS ssp_engage()
+ANSC_STATUS ssp_engage
+    (
+        PCCSP_COMPONENT_CFG         pStartCfg
+    )
 {
-	ANSC_STATUS					    returnStatus                = ANSC_STATUS_SUCCESS;
-    PCCC_MBI_INTERFACE              pSsdMbiIf                   = (PCCC_MBI_INTERFACE)MsgHelper_CreateCcdMbiIf((void*)bus_handle, g_Subsystem);
-    char                            CrName[256];
+    ANSC_STATUS        returnStatus = ANSC_STATUS_SUCCESS;
+    PCCC_MBI_INTERFACE pSsdMbiIf = (PCCC_MBI_INTERFACE)MsgHelper_CreateCcdMbiIf((void*)bus_handle, g_Subsystem);
+    char               CrName[256];    
+    PCCSP_DM_XML_CFG_LIST pXmlCfgList = NULL;
 
      g_pComponent_COMMON->Health = CCSP_COMMON_COMPONENT_HEALTH_Yellow;
 
@@ -168,16 +175,22 @@ ANSC_STATUS ssp_engage()
         _ansc_sprintf(CrName, "%s", CCSP_DBUS_INTERFACE_CR);
     }
 
+    returnStatus = CcspComponentLoadDmXmlList(pStartCfg->DmXmlCfgFileName, &pXmlCfgList);
+    if ( returnStatus != ANSC_STATUS_SUCCESS )
+    {
+        return  returnStatus;
+    }
+
     returnStatus =
         pDslhCpeController->RegisterCcspDataModel
             (
                 (ANSC_HANDLE)pDslhCpeController,
-                CrName,                                    /* CCSP_DBUS_INTERFACE_CR, CCSP CR ID */
-                CCSP_DATAMODEL_XML_FILE,                   /* Data Model XML file. Can be empty if only base data model supported. */
-                CCSP_COMPONENT_NAME,            /* Component Name    */
-                CCSP_COMPONENT_VERSION,         /* Component Version */
-                CCSP_COMPONENT_PATH,            /* Component Path    */
-                g_Subsystem                                /* Component Prefix  */
+                CrName,                             /* CCSP CR ID */
+                pXmlCfgList->FileList[0],           /* Data Model XML file. Can be empty if only base data model supported. */
+                pStartCfg->ComponentName,           /* Component Name    */
+                pStartCfg->Version,                 /* Component Version */
+                pStartCfg->DbusPath,                /* Component Path    */
+                g_Subsystem                         /* Component Prefix  */
             );
 
     if ( returnStatus == ANSC_STATUS_SUCCESS )
@@ -193,7 +206,10 @@ ANSC_STATUS ssp_engage()
  * @brief 
  * This function cancel the connection and delete component object from CR(Component Registrar).
  */
-ANSC_STATUS ssp_cancel()
+ANSC_STATUS ssp_cancel
+    (
+        PCCSP_COMPONENT_CFG         pStartCfg
+    )
 {
 	int                             nRet  = 0;
     char                            CrName[256];
@@ -207,12 +223,12 @@ ANSC_STATUS ssp_cancel()
     if ( g_Subsystem[0] != 0 )
     {
         _ansc_sprintf(CrName, "%s%s", g_Subsystem, CCSP_DBUS_INTERFACE_CR);
-        _ansc_sprintf(CpName, "%s%s", g_Subsystem, CCSP_COMPONENT_NAME);
+        _ansc_sprintf(CpName, "%s%s", g_Subsystem, pStartCfg->ComponentName);
     }
     else
     {
         _ansc_sprintf(CrName, "%s", CCSP_DBUS_INTERFACE_CR);
-        _ansc_sprintf(CpName, "%s", CCSP_COMPONENT_NAME);
+        _ansc_sprintf(CpName, "%s", pStartCfg->ComponentName);
     }
     /* unregister component */
     nRet = CcspBaseIf_unregisterComponent(bus_handle, CrName, CpName );  
@@ -312,7 +328,8 @@ ULONG ssp_CcdIfGetMemConsumed(ANSC_HANDLE  hThisObject)
 {
     LONG             size = 0;
 
-    size = AnscGetComponentMemorySize(CCSP_COMPONENT_NAME);
+    //TODO:Abdul
+    //size = AnscGetComponentMemorySize(gpEponStartCfg->ComponentName);
     if (size == -1 )
         size = 0;
 

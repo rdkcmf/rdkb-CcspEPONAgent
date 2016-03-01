@@ -162,7 +162,8 @@ int ssp_Mbi_Finalize(void* user_data)
 {
     ANSC_STATUS             returnStatus    = ANSC_STATUS_SUCCESS;
 
-    returnStatus = ssp_cancel();
+    //TODO:Abdul
+    //returnStatus = ssp_cancel();
 
     return ( returnStatus == ANSC_STATUS_SUCCESS ) ? 0 : 1;
 }
@@ -184,7 +185,8 @@ int ssp_Mbi_FreeResources(int priority,void  * user_data)
     }
     else if ( priority == CCSP_COMMON_COMPONENT_FREERESOURCES_PRIORITY_High )
     {
-        returnStatus = ssp_cancel();
+        //TODO:Abdul
+        //returnStatus = ssp_cancel();
     }
     
     return ( returnStatus == ANSC_STATUS_SUCCESS ) ? 0 : 1;

@@ -42,11 +42,6 @@
 #define  CCSP_COMMON_COMPONENT_FREERESOURCES_PRIORITY_High  1
 #define  CCSP_COMMON_COMPONENT_FREERESOURCES_PRIORITY_Low   2
 
-#define  CCSP_COMPONENT_ID                             "com.cisco.spvtg.ccsp.epon"
-#define  CCSP_COMPONENT_NAME                           "com.cisco.spvtg.ccsp.epon"
-#define  CCSP_COMPONENT_VERSION                        1
-#define  CCSP_COMPONENT_PATH                           "/com/cisco/spvtg/ccsp/"
-
 /**
  * @brief Defines component Structure
  */
@@ -125,6 +120,7 @@ void load_data_model();
 ANSC_STATUS
 ssp_create
 (
+    PCCSP_COMPONENT_CFG         pStartCfg
 );
 
 /**
@@ -133,6 +129,7 @@ ssp_create
 ANSC_STATUS
 ssp_engage
 (
+    PCCSP_COMPONENT_CFG         pStartCfg
 );
 
 /**
@@ -141,6 +138,7 @@ ssp_engage
 ANSC_STATUS
 ssp_cancel
 (
+    PCCSP_COMPONENT_CFG         pStartCfg
 );
 
 
