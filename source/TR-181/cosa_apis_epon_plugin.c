@@ -20,7 +20,16 @@
 #include "ansc_platform.h"
 #include "cosa_apis_epon_plugin.h"
 #include "ccsp_trace.h"
+#include "dpoe_hal.h"
+
 static ULONG                           i               = 0;
+
+#ifndef EPONAGENTLOG
+#define INFO  0
+#define WARNING  1
+#define ERROR 2
+#define EPONAGENTLOG(x, ...) {fprintf(stderr, "EponAgentLog<%s:%d> ", __FUNCTION__, __LINE__);fprintf(stderr, __VA_ARGS__);}
+#endif
 
 BOOL
 DPoE_GetParamUlongValue
@@ -30,29 +39,31 @@ DPoE_GetParamUlongValue
         ULONG*                      puLong
     )
 {
+EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "NumberOfNetworkPorts", TRUE) )
     {
-
+        return dpoe_getNumberOfNetworkPorts(puLong);
     }
     else if( AnscEqualString(ParamName, "NumberOfS1Interfaces", TRUE) )
     {
-
+        return dpoe_getNumberOfS1Interfaces( puLong );
     }
     else if( AnscEqualString(ParamName, "DynamicMacAddressAgeLimit", TRUE) )
     {
-
+        return dpoe_getDynamicMacAddressAgeLimit( puLong );
     }
     else if( AnscEqualString(ParamName, "DynamicMacLearningTableSize", TRUE) )
     {
-
+        return dpoe_getDynamicMacLearningTableSize( puLong );
     }
     else if( AnscEqualString(ParamName, "MacLearningAggregateLimit", TRUE) )
     {
-
+        return dpoe_getMacLearningAggregateLimit( puLong );
     }
 
     AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return FALSE;
 }
 
@@ -64,7 +75,9 @@ DPoE_SetParamUlongValue
         ULONG                       uValue
     )
 {
+EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return FALSE;
 }
 
@@ -77,7 +90,9 @@ DPoE_SetParamStringValue
         char*                       pString
     )
 {
+EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return FALSE;
 }
 
@@ -91,13 +106,17 @@ DPoE_GetParamStringValue
         ULONG*                      pUlSize
     )
 {
+EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "Mac_Address", TRUE) )
     {
-
+        /* todo */
+        // set pUlSize to total bytes of OnuId...
+        return dpoe_getOnuId( (dpoe_mac_address_t *)pValue );
     }
 
     AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return FALSE;
 }
 
@@ -110,7 +129,9 @@ DPoE_GetParamBoolValue
         BOOL*                       pBool
     )
 {
+EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return FALSE;
 }
 BOOL
@@ -121,16 +142,17 @@ DPoE_SetParamBoolValue
         BOOL                        bValue
     )
 {
+EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "ResetOnu", TRUE) )
     {
-
+        return dpoe_setResetOnu();
     }
     else if( AnscEqualString(ParamName, "ClearOnuLinkStatistics", TRUE) )
     {
-
+        return dpoe_setClearOnuLinkStatistics();
     }
-
+EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
     return FALSE;
 }
@@ -143,7 +165,9 @@ DPoE_GetParamIntValue
         INT*                        iValue
     )
 {
+EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return FALSE;
 }
 
@@ -155,7 +179,9 @@ DPoE_SetParamIntValue
         INT                         iValue
     )
 {
+EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return FALSE;
 }
 
@@ -187,6 +213,8 @@ DPoE_Commit
         ANSC_HANDLE                 hInsContext
     )
 {
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return 0;
 }
 
@@ -198,6 +226,8 @@ DPoE_Validate
         ULONG*                      puLength
     )
 {
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return FALSE;
 }
 
@@ -207,6 +237,8 @@ DPoE_Rollback
         ANSC_HANDLE                 hInsContext
     )
 {
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return 0;
 }
 
@@ -218,17 +250,37 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
+    dpoe_firmware_info_t    FirmwareInfo;
+    BOOL status = dpoe_getFirmwareInfo( &FirmwareInfo );
+    *pValue = NULL;
+    *pUlSize = 0L;
+
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "bootVersion", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pUlSize = strlen( (char *)&FirmwareInfo.info_bootVersion );
+            strncpy ( pValue, (char *)&FirmwareInfo.info_bootVersion, *pUlSize );
+        }
     }
     else if( AnscEqualString(ParamName, "appVersion", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pUlSize = strlen( (char *)&FirmwareInfo.info_appVersion );
+            strncpy( pValue, (char *)&FirmwareInfo.info_appVersion, *pUlSize );
+        }
     }
-    AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
-    return FALSE;
+    else
+    {
+        AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+        return FALSE;
+    }
+    
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
+    return status;
 }
 
 BOOL DPoE_FirmwareInfo_GetParamUlongValue
@@ -238,17 +290,35 @@ BOOL DPoE_FirmwareInfo_GetParamUlongValue
     ULONG*                      pLong
 )
 {
+    dpoe_firmware_info_t    FirmwareInfo;
+    BOOL status = dpoe_getFirmwareInfo( &FirmwareInfo );
+    *pLong = 0L;
+
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "bootCrc32", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pLong = FirmwareInfo.info_bootCrc32;
+        }
     }
     else if( AnscEqualString(ParamName, "appCrc32", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pLong = FirmwareInfo.info_appCrc32;
+        }
     }
-    AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
-    return FALSE;
+    else
+    {
+        AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+        return FALSE;
+    }
+
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
+    return status;
 }
 
 BOOL DPoE_ChipInfo_GetParamStringValue
@@ -259,17 +329,38 @@ BOOL DPoE_ChipInfo_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
+    dpoe_epon_chip_info_t EponChipInfo;
+    BOOL status = dpoe_getEponChipInfo( &EponChipInfo );
+    *pValue = NULL;
+    *pUlSize = 0L;
+
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "chipModel", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pUlSize = strlen( (char *)&EponChipInfo.info_ChipModel );
+            strncpy( pValue, (char *)&EponChipInfo.info_ChipModel, *pUlSize );
+        }
     }
     else if( AnscEqualString(ParamName, "chipVersion", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pUlSize = strlen( (char *)&EponChipInfo.info_ChipVersion );
+            strncpy( pValue, (char *)&EponChipInfo.info_ChipVersion, *pUlSize );
+        }
     }
-    AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
-    return FALSE;
+    else
+    {
+        AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+        return FALSE;
+    }
+
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
+    return status;
 }
 
 BOOL DPoE_ChipInfo_GetParamUlongValue
@@ -279,14 +370,27 @@ BOOL DPoE_ChipInfo_GetParamUlongValue
     ULONG*                      pLong
 )
 {
+    dpoe_epon_chip_info_t EponChipInfo;
+    BOOL status = dpoe_getEponChipInfo( &EponChipInfo );
+    *pLong = 0L;
+
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "jedecId", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pLong = EponChipInfo.info_JedecId;
+        }
+    }
+    else
+    {
+        AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+        return FALSE;
     }
 
-    AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
-    return FALSE;
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
+    return status;
 }
 
 BOOL DPoE_ManufacturerInfo_GetParamStringValue
@@ -297,22 +401,43 @@ BOOL DPoE_ManufacturerInfo_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
+    dpoe_manufacturer_t    ManufacturerInfo;
+    BOOL status = dpoe_getManufacturerInfo(&ManufacturerInfo);
+    *pValue = NULL;
+    *pUlSize = 0L;
+
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "info", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pUlSize = strlen( (char *)&ManufacturerInfo.manufacturer_Info );
+        }
     }
     else if( AnscEqualString(ParamName, "organizationName", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            //TODO: Abdul
+            //*pUlSize = strlen( (char *)&ManufacturerInfo.manufacturer_organizationName );
+        }
     }
     else if( AnscEqualString(ParamName, "manufacturerDate", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pUlSize = sizeof(ManufacturerInfo.manufacturer_Date);
+        }
+    }
+    else
+    {
+        AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+        return FALSE;
     }
 
-    AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
-    return FALSE;
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
+    return status;
 }
 
 BOOL DPoE_DeviceSysDescrInfo_GetParamStringValue
@@ -323,21 +448,46 @@ BOOL DPoE_DeviceSysDescrInfo_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
-    /* check the parameter name and return the corresponding value */
+    dpoe_device_sys_descr_info_t    DeviceSysDescrInfo;
+    BOOL status = dpoe_getDeviceSysDescrInfo(&DeviceSysDescrInfo);
+    *pValue = NULL;
+    *pUlSize = 0L;
+
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+
+    //check the parameter name and return the corresponding value
+    //TODO: Abdul
+    /*
     if( AnscEqualString(ParamName, "vendorName", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {            
+            *pUlSize = strlen( (char *)&DeviceSysDescrInfo.info_vendorName );
+        }
     }
     else if( AnscEqualString(ParamName, "modelNumber", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pUlSize = strlen( (char *)&DeviceSysDescrInfo.info_modelNumber );
+        }
     }
     else if( AnscEqualString(ParamName, "hardwareVersion", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *pUlSize = strlen( (char *)&DeviceSysDescrInfo.info_hardwareVersion );
+        }
     }
-    AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
-    return FALSE;
+    else
+    {
+        AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+        return FALSE;
+    }
+    */
+
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
+    return status;
 }
 
 BOOL DPoE_OnuPacketBufferCapabilities_GetParamUlongValue
@@ -347,41 +497,77 @@ BOOL DPoE_OnuPacketBufferCapabilities_GetParamUlongValue
     ULONG*                      puLong
 )
 {
+    dpoe_onu_packet_buffer_capabilities_t    Capabilities;
+    BOOL status = dpoe_getOnuPacketBufferCapabilities( &Capabilities );
+    *puLong = 0L;
+
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "upstreamQueues", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *puLong = Capabilities.capabilities_UpstreamQueues;
+        }
     }
     else if( AnscEqualString(ParamName, "upQueuesMaxPerLink", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *puLong = Capabilities.capabilities_UpQueuesMaxPerLink;
+        }
     }
     else if( AnscEqualString(ParamName, "upQueueIncrement", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *puLong = Capabilities.capabilities_UpQueueIncrement;
+        }
     }
     else if( AnscEqualString(ParamName, "downstreamQueues", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *puLong = Capabilities.capabilities_DownstreamQueues;
+        }
     }
     else if( AnscEqualString(ParamName, "dnQueuesMaxPerPort", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *puLong = Capabilities.capabilities_DnQueuesMaxPerPort;
+        }
     }
     else if( AnscEqualString(ParamName, "dnQueueIncrement", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *puLong = Capabilities.capabilities_DnQueueIncrement;
+        }
     }
     else if( AnscEqualString(ParamName, "totalPacketBuffer", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *puLong = Capabilities.capabilities_TotalPacketBuffer;
+        }
     }
     else if( AnscEqualString(ParamName, "dnPacketBuffer", TRUE) )
     {
-
+        if ( status == RETURN_OK )
+        {
+            *puLong = Capabilities.capabilities_DnPacketBuffer;
+        }
     }
-    AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
-    return FALSE;
+    else
+    {
+        AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
+        return FALSE;
+    }
+
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
+    return status;
 }
 
 ULONG DPoE_LlidForwardingState_GetEntryCount

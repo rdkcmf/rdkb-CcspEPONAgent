@@ -59,12 +59,14 @@ int  cmd_dispatch(int  command)
     ULONG                           ulReturnValCount   = 0;
     ULONG                           i                  = 0;
 
+    EPONAGENTLOG(INFO, "Entering into %s\n", __FUNCTION__)
+
     switch ( command )
     {
         case    'e' :
 
 #ifdef _ANSC_LINUX
-            CcspTraceInfo(("Connect to bus daemon...\n"));
+            EPONAGENTLOG(INFO, "Connect to bus daemon...\n")
 
             {
                 char                            CName[256];
@@ -106,7 +108,7 @@ int  cmd_dispatch(int  command)
 
                 for ( i = 0; i < ulReturnValCount; i++ )
                 {
-                    CcspTraceWarning(("Parameter %d name: %s value: %s \n", i+1, ppReturnVal[i]->parameterName, ppReturnVal[i]->parameterValue));
+		    EPONAGENTLOG(WARNING,"Parameter %d name: %s value: %s \n", i+1, ppReturnVal[i]->parameterName, ppReturnVal[i]->parameterValue)
                 }
 
                 break;
@@ -133,6 +135,7 @@ int  cmd_dispatch(int  command)
             break;
     }
 
+    EPONAGENTLOG(INFO, "Exiting from %s\n", __FUNCTION__)
     return 0;
 }
 
@@ -164,6 +167,8 @@ static void _print_stack_backtrace(void)
 #if defined(_ANSC_LINUX)
 static void daemonize(void) {
     int fd;
+    EPONAGENTLOG(INFO, "Entering into %s\n", __FUNCTION__)
+
     switch (fork()) {
     case 0:
         break;
@@ -203,6 +208,8 @@ static void daemonize(void) {
         close(fd);
     }
 #endif
+
+    EPONAGENTLOG(INFO, "Exiting from %s\n", __FUNCTION__)
 }
 
 void sig_handler(int sig)
@@ -281,7 +288,9 @@ int main(int argc, char* argv[])
 
     extern ANSC_HANDLE bus_handle;
     char *subSys = NULL;
-    DmErr_t err;
+    DmErr_t err;   
+
+    EPONAGENTLOG(INFO, "Entering into %s\n", __FUNCTION__)
 
     /*
      *  Load the start configuration
@@ -289,7 +298,7 @@ int main(int argc, char* argv[])
     gpEponStartCfg = (PCCSP_COMPONENT_CFG)AnscAllocateMemory(sizeof(CCSP_COMPONENT_CFG));
     
     AnscSetTraceLevel(CCSP_TRACE_LEVEL_DEBUG);
-    //g_iTraceLevel = CCSP_TRACE_LEVEL_DEBUG;
+    g_iTraceLevel = CCSP_TRACE_LEVEL_DEBUG;
 
     if ( gpEponStartCfg )
     {
@@ -297,6 +306,7 @@ int main(int argc, char* argv[])
     }
     else
     {
+        EPONAGENTLOG(ERROR, "Failed to AnscAllocateMemory for CCSP_COMPONENT_CFG. Exiting...\n")
         exit(1);
     }
     
@@ -335,7 +345,7 @@ int main(int argc, char* argv[])
     fd = fopen("/var/tmp/CcspEPONAgentSsp.pid", "w+");
     if ( !fd )
     {
-        CcspTraceWarning(("Create /var/tmp/CcspEPONAgentSsp.pid error. \n"));
+        EPONAGENTLOG(WARNING,"Create /var/tmp/CcspEPONAgentSsp.pid error. Exiting...\n")
         return 1;
     }
     sprintf(cmd, "%d", getpid());
@@ -345,11 +355,11 @@ int main(int argc, char* argv[])
     if (is_core_dump_opened())
     {
         signal(SIGUSR1, sig_handler);
-        CcspTraceWarning(("Core dump is opened, do not catch signal\n"));
+        EPONAGENTLOG(WARNING,"Core dump is opened, do not catch signal\n")
     }
     else
     {
-        CcspTraceWarning(("Core dump is NOT opened, backtrace if possible\n"));
+        EPONAGENTLOG(WARNING,"Core dump is NOT opened, backtrace if possible\n")
 
         signal(SIGTERM, sig_handler);
         signal(SIGINT, sig_handler);
@@ -376,7 +386,7 @@ int main(int argc, char* argv[])
     err = Cdm_Init(bus_handle, subSys, NULL, NULL, pComponentName);
     if (err != CCSP_SUCCESS)
     {
-        fprintf(stderr, "Cdm_Init: %s\n", Cdm_StrError(err));
+        EPONAGENTLOG(ERROR,"Cdm_Init: %s\n. Exiting...", Cdm_StrError(err))
         exit(1);
     }
    // rdk_logger_init("/fss/gw/lib/debug.ini");
@@ -404,12 +414,13 @@ int main(int argc, char* argv[])
     err = Cdm_Term();
     if (err != CCSP_SUCCESS)
     {
-    fprintf(stderr, "Cdm_Term: %s\n", Cdm_StrError(err));
-    exit(1);
+        EPONAGENTLOG(ERROR,"Cdm_Term: %s. Exiting...\n", Cdm_StrError(err))
+        exit(1);
     }
 
     ssp_cancel(gpEponStartCfg);
 
+    EPONAGENTLOG(INFO, "Exiting from %s\n", __FUNCTION__)
     return 0;
 }
 

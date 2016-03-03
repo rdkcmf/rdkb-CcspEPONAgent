@@ -18,7 +18,6 @@
 ##########################################################################
 AM_CFLAGS = -D_ANSC_LINUX
 AM_CFLAGS += -D_ANSC_USER
-AM_CFLAGS += -D_ANSC_LITTLE_ENDIAN_
 AM_LDFLAGS = -lccsp_common
 AM_LDFLAGS += -lsysevent
 AM_LDFLAGS += -lsyscfg

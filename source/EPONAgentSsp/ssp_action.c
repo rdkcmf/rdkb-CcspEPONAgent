@@ -64,6 +64,7 @@ ANSC_STATUS ssp_create
         PCCSP_COMPONENT_CFG         pStartCfg
     )
 {
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     /* Create component common data model object */
 
      g_pComponent_COMMON = (PCOMPONENT_COMMON_DM)AnscAllocateMemory(sizeof(COMPONENT_COMMON_DM));
@@ -128,18 +129,25 @@ ANSC_STATUS ssp_create
             pDslhLcbIf->InterfaceId              = CCSP_LIBCBK_INTERFACE_ID;
             pDslhLcbIf->hOwnerContext            = NULL;
             pDslhLcbIf->Size                     = sizeof(DSLH_LCB_INTERFACE);
+            
+            EPONAGENTLOG(ERROR, "CCSP_LIBCBK_INTERFACE_NAME: %s CCSP_LIBCBK_INTERFACE_ID: %d \n", CCSP_LIBCBK_INTERFACE_NAME, CCSP_LIBCBK_INTERFACE_ID)
         }
     }
 
     pDslhCpeController = DslhCreateCpeController(NULL, NULL, NULL);
 
     if ( !pDslhCpeController )
-    {
-        CcspTraceWarning(("CANNOT Create pDslhCpeController... Exit!\n"));
+    {        
+        EPONAGENTLOG(ERROR, "CANNOT Create pDslhCpeController... Exit!\n")
 
         return ANSC_STATUS_RESOURCES;
     }
+    else
+    {
+        EPONAGENTLOG(INFO, "Created pDslhCpeController successfully\n")
+    }
 
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return ANSC_STATUS_SUCCESS;
 }
 
@@ -157,7 +165,8 @@ ANSC_STATUS ssp_engage
     char               CrName[256];    
     PCCSP_DM_XML_CFG_LIST pXmlCfgList = NULL;
 
-     g_pComponent_COMMON->Health = CCSP_COMMON_COMPONENT_HEALTH_Yellow;
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+    g_pComponent_COMMON->Health = CCSP_COMMON_COMPONENT_HEALTH_Yellow;
 
     /* data model configuration */
     pDslhCpeController->AddInterface((ANSC_HANDLE)pDslhCpeController, (ANSC_HANDLE)pDslhLcbIf);
@@ -178,8 +187,11 @@ ANSC_STATUS ssp_engage
     returnStatus = CcspComponentLoadDmXmlList(pStartCfg->DmXmlCfgFileName, &pXmlCfgList);
     if ( returnStatus != ANSC_STATUS_SUCCESS )
     {
+        EPONAGENTLOG(ERROR, "Failed to LoadDmXmlList of %s \n", pStartCfg->DmXmlCfgFileName)
         return  returnStatus;
     }
+
+    EPONAGENTLOG(INFO, "System is fully initialized. CrName: <%s>\npXmlCfgList->FileList[0]: <%s>\npStartCfg->ComponentName: <%s>\npStartCfg->DbusPath: %s\ng_Subsystem: %s\n", CrName, pXmlCfgList->FileList[0], pStartCfg->ComponentName, pStartCfg->DbusPath, g_Subsystem)
 
     returnStatus =
         pDslhCpeController->RegisterCcspDataModel
@@ -191,14 +203,20 @@ ANSC_STATUS ssp_engage
                 pStartCfg->Version,                 /* Component Version */
                 pStartCfg->DbusPath,                /* Component Path    */
                 g_Subsystem                         /* Component Prefix  */
-            );
+            );   
 
     if ( returnStatus == ANSC_STATUS_SUCCESS )
     {
         /* System is fully initialized */
          g_pComponent_COMMON->Health = CCSP_COMMON_COMPONENT_HEALTH_Green;
+         EPONAGENTLOG(INFO, "System is fully initialized")
+    }
+    else
+    {
+         EPONAGENTLOG(INFO, "System is failed to initialized. returnStatus: %d", returnStatus)
     }
 
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return ANSC_STATUS_SUCCESS;
 }
 

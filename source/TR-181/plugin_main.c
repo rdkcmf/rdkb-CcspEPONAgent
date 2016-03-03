@@ -52,6 +52,13 @@
 
 #define THIS_PLUGIN_VERSION                         1
 
+#ifndef EPONAGENTLOG
+#define INFO  0
+#define WARNING  1
+#define ERROR 2
+#define EPONAGENTLOG(x, ...) {fprintf(stderr, "EponAgentLog<%s:%d> ", __FUNCTION__, __LINE__);fprintf(stderr, __VA_ARGS__);}
+#endif
+
 int ANSC_EXPORT_API
 COSA_Init
     (
@@ -61,6 +68,8 @@ COSA_Init
 {
     PCOSA_PLUGIN_INFO               pPlugInfo  = (PCOSA_PLUGIN_INFO)hCosaPlugInfo;
 
+    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+
     if ( uMaxVersionSupported < THIS_PLUGIN_VERSION )
     {
       /* this version is not supported */
@@ -68,6 +77,8 @@ COSA_Init
     }   
     
     pPlugInfo->uPluginVersion       = THIS_PLUGIN_VERSION;
+
+    EPONAGENTLOG(INFO, "registering the back-end apis for the data model\n")
     /* register the back-end apis for the data model */
     pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DPoE_GetParamBoolValue",  DPoE_GetParamBoolValue);
     pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DPoE_GetParamUlongValue", DPoE_GetParamUlongValue);
@@ -102,6 +113,8 @@ COSA_Init
     pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DPoE_OnuLinkStatistics_GetEntryCount", DPoE_OnuLinkStatistics_GetEntryCount);
     pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DPoE_OnuLinkStatistics_GetEntry", DPoE_OnuLinkStatistics_GetEntry);
     pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DPoE_OnuLinkStatistics_GetParamUlongValue", DPoE_OnuLinkStatistics_GetParamUlongValue);
+    
+    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return  0;
 }
 
@@ -122,4 +135,6 @@ COSA_Unload
     )
 {
     /* unload the memory here */
+EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
 }
