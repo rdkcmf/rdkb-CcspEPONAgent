@@ -60,6 +60,12 @@
 #ifndef  _PLUGIN_MAIN_H
 #define  _PLUGIN_MAIN_H
 
+#ifndef EPONAGENTLOG
+#define INFO  0
+#define WARNING  1
+#define ERROR 2
+#define EPONAGENTLOG(x, ...) {fprintf(stderr, "EponAgentLog<%s:%d> ", __FUNCTION__, __LINE__);fprintf(stderr, __VA_ARGS__);}
+#endif
 
 #if (defined _ANSC_WINDOWSNT) || (defined _ANSC_WINDOWS9X)
 
@@ -75,7 +81,7 @@
 #define ANSC_EXPORT_API
 #endif
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 extern "C"{
 #endif
 
@@ -87,7 +93,7 @@ extern "C"{
 int ANSC_EXPORT_API
 COSA_Init
     (
-        ULONG                       uMaxVersionSupported, 
+        ULONG                       uMaxVersionSupported,
         void*                       hCosaPlugInfo         /* PCOSA_PLUGIN_INFO passed in by the caller */
     );
 
@@ -103,7 +109,7 @@ COSA_Unload
         void
     );
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 }
 #endif
 

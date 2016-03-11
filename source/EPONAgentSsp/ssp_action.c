@@ -37,26 +37,26 @@
 /*                               Library Objects                              */
 /*----------------------------------------------------------------------------*/
 
-PDSLH_CPE_CONTROLLER_OBJECT     pDslhCpeController              = NULL;
-PCOMPONENT_COMMON_DM    g_pComponent_COMMON  = NULL;
-PCCSP_CCD_INTERFACE             pSsdCcdIf                       = (PCCSP_CCD_INTERFACE)NULL;
-PDSLH_LCB_INTERFACE             pDslhLcbIf                      = (PDSLH_LCB_INTERFACE)NULL;
+PDSLH_CPE_CONTROLLER_OBJECT     pDslhCpeController   = NULL;
+PCOMPONENT_COMMON_DM            g_pComponent_COMMON  = NULL;
+PCCSP_CCD_INTERFACE             pSsdCcdIf            = (PCCSP_CCD_INTERFACE)NULL;
+PDSLH_LCB_INTERFACE             pDslhLcbIf           = (PDSLH_LCB_INTERFACE)NULL;
 
 
 /*----------------------------------------------------------------------------*/
 /*                           External Variables                               */
 /*----------------------------------------------------------------------------*/
 
-extern char                     g_Subsystem[32];
-extern  ANSC_HANDLE             bus_handle;
-extern  ULONG                   g_ulAllocatedSizePeak;
-
+extern char                    g_Subsystem[32];
+extern ANSC_HANDLE             bus_handle;
+extern ULONG                   g_ulAllocatedSizePeak;
+extern PCCSP_COMPONENT_CFG     gpEponStartCfg;
 /*----------------------------------------------------------------------------*/
 /*                           External Functions                               */
 /*----------------------------------------------------------------------------*/
 
 /**
- * @brief 
+ * @brief
  * This function creates component object in the CR(Component Registrar).
  */
 ANSC_STATUS ssp_create
@@ -66,11 +66,11 @@ ANSC_STATUS ssp_create
 {
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     /* Create component common data model object */
-
-     g_pComponent_COMMON = (PCOMPONENT_COMMON_DM)AnscAllocateMemory(sizeof(COMPONENT_COMMON_DM));
+    g_pComponent_COMMON = (PCOMPONENT_COMMON_DM)AnscAllocateMemory(sizeof(COMPONENT_COMMON_DM));
 
     if ( ! g_pComponent_COMMON )
     {
+        EPONAGENTLOG(ERROR, "CANNOT Create g_pComponent_COMMON... Exit!\n")
         return ANSC_STATUS_RESOURCES;
     }
 
@@ -87,6 +87,7 @@ ANSC_STATUS ssp_create
 
         if ( !pSsdCcdIf )
         {
+            EPONAGENTLOG(ERROR, "CANNOT Create pSsdCcdIf... Exit!\n")
             return ANSC_STATUS_RESOURCES;
         }
         else
@@ -120,6 +121,7 @@ ANSC_STATUS ssp_create
 
         if ( !pDslhLcbIf )
         {
+            EPONAGENTLOG(ERROR, "CANNOT Create pDslhLcbIf... Exit!\n")
             return ANSC_STATUS_RESOURCES;
         }
         else
@@ -129,15 +131,15 @@ ANSC_STATUS ssp_create
             pDslhLcbIf->InterfaceId              = CCSP_LIBCBK_INTERFACE_ID;
             pDslhLcbIf->hOwnerContext            = NULL;
             pDslhLcbIf->Size                     = sizeof(DSLH_LCB_INTERFACE);
-            
-            EPONAGENTLOG(ERROR, "CCSP_LIBCBK_INTERFACE_NAME: %s CCSP_LIBCBK_INTERFACE_ID: %d \n", CCSP_LIBCBK_INTERFACE_NAME, CCSP_LIBCBK_INTERFACE_ID)
+
+            EPONAGENTLOG(INFO, "CCSP_LIBCBK_INTERFACE_NAME: %s CCSP_LIBCBK_INTERFACE_ID: %d \n", CCSP_LIBCBK_INTERFACE_NAME, CCSP_LIBCBK_INTERFACE_ID)
         }
     }
 
     pDslhCpeController = DslhCreateCpeController(NULL, NULL, NULL);
 
     if ( !pDslhCpeController )
-    {        
+    {
         EPONAGENTLOG(ERROR, "CANNOT Create pDslhCpeController... Exit!\n")
 
         return ANSC_STATUS_RESOURCES;
@@ -191,37 +193,35 @@ ANSC_STATUS ssp_engage
         return  returnStatus;
     }
 
-    EPONAGENTLOG(INFO, "System is fully initialized. CrName: <%s>\npXmlCfgList->FileList[0]: <%s>\npStartCfg->ComponentName: <%s>\npStartCfg->DbusPath: %s\ng_Subsystem: %s\n", CrName, pXmlCfgList->FileList[0], pStartCfg->ComponentName, pStartCfg->DbusPath, g_Subsystem)
+    EPONAGENTLOG(INFO, "Registering CcspDataModel with following parameters\nCrName: <%s>\npXmlCfgList->FileList[0]: <%s>\npStartCfg->ComponentName: <%s>\npStartCfg->DbusPath: %s\ng_Subsystem: %s\n", CrName, pXmlCfgList->FileList[0], pStartCfg->ComponentName, pStartCfg->DbusPath, g_Subsystem)
 
-    returnStatus =
-        pDslhCpeController->RegisterCcspDataModel
-            (
-                (ANSC_HANDLE)pDslhCpeController,
-                CrName,                             /* CCSP CR ID */
-                pXmlCfgList->FileList[0],           /* Data Model XML file. Can be empty if only base data model supported. */
-                pStartCfg->ComponentName,           /* Component Name    */
-                pStartCfg->Version,                 /* Component Version */
-                pStartCfg->DbusPath,                /* Component Path    */
-                g_Subsystem                         /* Component Prefix  */
-            );   
+	returnStatus =
+	    pDslhCpeController->RegisterCcspDataModel
+		    (
+		        (ANSC_HANDLE)pDslhCpeController,
+		        CrName,                             /* CCSP CR ID */
+		        pXmlCfgList->FileList[0],           /* Data Model XML file. Can be empty if only base data model supported. */
+		        pStartCfg->ComponentName,           /* Component Name    */
+		        pStartCfg->Version,                 /* Component Version */
+		        pStartCfg->DbusPath,                /* Component Path    */
+		        g_Subsystem                         /* Component Prefix  */
+		    );
 
-    if ( returnStatus == ANSC_STATUS_SUCCESS )
+    if ( returnStatus == ANSC_STATUS_SUCCESS || (returnStatus == CCSP_SUCCESS) )
     {
-        /* System is fully initialized */
+         EPONAGENTLOG(INFO, "Successfully registered RegisterCcspDataModel with CpeController\n")
+         /* System is fully initialized */
          g_pComponent_COMMON->Health = CCSP_COMMON_COMPONENT_HEALTH_Green;
-         EPONAGENTLOG(INFO, "System is fully initialized")
     }
     else
-    {
-         EPONAGENTLOG(INFO, "System is failed to initialized. returnStatus: %d", returnStatus)
-    }
+        EPONAGENTLOG(INFO, "Failed to RegisterCcspDataModel\n")
 
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
-    return ANSC_STATUS_SUCCESS;
+    return returnStatus;
 }
 
 /**
- * @brief 
+ * @brief
  * This function cancel the connection and delete component object from CR(Component Registrar).
  */
 ANSC_STATUS ssp_cancel
@@ -346,8 +346,7 @@ ULONG ssp_CcdIfGetMemConsumed(ANSC_HANDLE  hThisObject)
 {
     LONG             size = 0;
 
-    //TODO:Abdul
-    //size = AnscGetComponentMemorySize(gpEponStartCfg->ComponentName);
+    size = AnscGetComponentMemorySize(gpEponStartCfg->ComponentName);
     if (size == -1 )
         size = 0;
 
