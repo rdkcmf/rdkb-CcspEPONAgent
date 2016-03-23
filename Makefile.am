@@ -24,7 +24,7 @@ lib_LTLIBRARIES=libepon_tr181.la
 
 libepon_tr181_la_CPPFLAGS= -D_ANSC_LINUX -D_ANSC_USER
 
-libepon_tr181_la_LDFLAGS= -lccsp_common
+libepon_tr181_la_LDFLAGS= -lccsp_common -lhal_pon
 
 libepon_tr181_la_SOURCES= \
     source/TR-181/plugin_main.c \

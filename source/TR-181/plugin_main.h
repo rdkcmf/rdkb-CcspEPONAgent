@@ -60,10 +60,13 @@
 #ifndef  _PLUGIN_MAIN_H
 #define  _PLUGIN_MAIN_H
 
-#ifndef EPONAGENTLOG
 #define INFO  0
 #define WARNING  1
 #define ERROR 2
+
+#ifdef FEATURE_SUPPORT_RDKLOG
+#define EPONAGENTLOG(x, ...) { if((x)==(INFO)){CcspTraceInfo((__VA_ARGS__));}else if((x)==(WARNING)){CcspTraceWarning((__VA_ARGS__));}else if((x)==(ERROR)){CcspTraceError((__VA_ARGS__));} }
+#else
 #define EPONAGENTLOG(x, ...) {fprintf(stderr, "EponAgentLog<%s:%d> ", __FUNCTION__, __LINE__);fprintf(stderr, __VA_ARGS__);}
 #endif
 
