@@ -52,7 +52,7 @@ int  cmd_dispatch(int  command)
 {
     ULONG                           ulInsNumber        = 0;
     parameterValStruct_t            val[3]             = {0};
-    char*                           pParamNames[]      = {"Device.Optical.DPoE."};
+    char*                           pParamNames[]      = {"Device.DPoE."};
     parameterValStruct_t**          ppReturnVal        = NULL;
     parameterInfoStruct_t**         ppReturnValNames   = NULL;
     parameterAttributeStruct_t**    ppReturnvalAttr    = NULL;
