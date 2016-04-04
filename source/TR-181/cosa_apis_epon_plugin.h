@@ -115,13 +115,6 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
     ULONG*                      pUlSize
 );
 
-BOOL DPoE_FirmwareInfo_GetParamUlongValue
-(
-    ANSC_HANDLE                 hInsContext,
-    char*                       ParamName,
-    ULONG*                      puLong
-);
-
 BOOL DPoE_ChipInfo_GetParamStringValue
 (
     ANSC_HANDLE                 hInsContext,
@@ -130,12 +123,6 @@ BOOL DPoE_ChipInfo_GetParamStringValue
     ULONG*                      pUlSize
 );
 
-BOOL DPoE_ChipInfo_GetParamUlongValue
-(
-    ANSC_HANDLE                 hInsContext,
-    char*                       ParamName,
-    ULONG*                      puLong
-);
 
 BOOL DPoE_ManufacturerInfo_GetParamStringValue
 (
@@ -179,11 +166,11 @@ BOOL DPoE_LlidForwardingState_GetParamBoolValue
     BOOL*                       pBool
 );
 
-BOOL DPoE_LlidForwardingState_GetParamIntValue
+BOOL DPoE_LlidForwardingState_GetParamUlongValue
 (
     ANSC_HANDLE                 hInsContext,
     char*                       ParamName,
-    INT*                        iValue
+    ULONG*                      puLong
 );
 
 ULONG DPoE_OamFrameRate_GetEntryCount
@@ -198,11 +185,11 @@ ANSC_HANDLE DPoE_OamFrameRate_GetEntry
     ULONG*                      pInsNumber
 );
 
-BOOL DPoE_OamFrameRate_GetParamIntValue
+BOOL DPoE_OamFrameRate_GetParamUlongValue
 (
     ANSC_HANDLE                 hInsContext,
     char*                       ParamName,
-    INT*                        iValue
+    ULONG*                      puLong
 );
 
 ULONG DPoE_DynamicMacTable_GetEntryCount
@@ -225,11 +212,11 @@ BOOL DPoE_DynamicMacTable_GetParamStringValue
     ULONG*                      pUlSize
 );
 
-BOOL DPoE_DynamicMacTable_GetParamIntValue
+BOOL DPoE_DynamicMacTable_GetParamUlongValue
 (
     ANSC_HANDLE                 hInsContext,
     char*                       ParamName,
-    INT*                        iValue
+    ULONG*                      puLong
 );
 
 ULONG DPoE_StaticMacTable_GetEntryCount

@@ -22,6 +22,8 @@
 #include "ccsp_trace.h"
 #include "dpoe_hal.h"
 
+#define MAX_DPOE_DATA_ENTRY  32
+
 static ULONG i = 0;
 static dpoe_onu_packet_buffer_capabilities_t    Capabilities;
 static BOOL bOnu_packet_buffer_capabilities_fetched = FALSE;
@@ -33,8 +35,11 @@ static dpoe_epon_chip_info_t                    EponChipInfo;
 static BOOL bEpon_chip_info_fetched = FALSE;
 static dpoe_firmware_info_t                     FirmwareInfo;
 static BOOL bFirmware_info_fetched = FALSE;
-
-static dpoe_link_traffic_stats_t    onuLinkTrafficStats[128];
+static dpoe_link_traffic_stats_t    onuLinkTrafficStats[MAX_DPOE_DATA_ENTRY];
+static dpoe_link_mac_address_t    linkStaticMacTable[MAX_DPOE_DATA_ENTRY];
+static dpoe_link_mac_address_t    linkDynamicMacTable[MAX_DPOE_DATA_ENTRY];
+static dpoe_link_oam_frame_rate_t    linkOamFrameRate[MAX_DPOE_DATA_ENTRY];
+static dpoe_link_forwarding_state_t linkForwardingState[MAX_DPOE_DATA_ENTRY];
 
 #define INFO  0
 #define WARNING  1
@@ -51,6 +56,15 @@ static dpoe_link_traffic_stats_t    onuLinkTrafficStats[128];
 #define FAILURE -1
 
 #define DPOE_MAC_ADDRESS_LENGTH 6
+
+#if 1
+// local functions to be replaced by Broadcom's
+int dpoe_OnuLinkStatistics_GetEntryCount( void ) {return 2;};
+int dpoe_LlidForwardingState_GetEntryCount( void ) {return 3;};
+int dpoe_OamFrameRate_GetEntryCount( void ) {return 1;};
+int dpoe_DynamicMacTable_GetEntryCount( void ) {return 1;};
+int dpoe_StaticMacTable_GetEntryCount( void ) {return 5;};
+#endif
 
 //  This function should be called by scp_main to prefetch all the static DPoE parameters.
 //  This will make the dmcli operation a lot quicker.
@@ -82,6 +96,32 @@ DPoE_Init_Parms( void )
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return TRUE;
 }
+
+#define RUNNING_WITHOUT_TIMER
+#if !defined( RUNNING_WITHOUT_TIMER )
+DPoE_TimerUpdate( void )
+{
+    int j;
+
+    dpoe_getOnuLinkStatistics(&onuLinkTrafficStats[0], dpoe_OnuLinkStatistics_GetEntryCount());
+
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
+    {
+        linkStaticMacTable[j].link = j;
+        linkDynamicMacTable[j].link = j;
+        linkForwardingState[j].link_Id = j;
+        linkOamFrameRate[j].link_Id = j;
+    }
+
+    dpoe_getStaticMacTable(&linkStaticMacTable[0], dpoe_StaticMacTable_GetEntryCount());
+    dpoe_getDynamicMacTable(&linkDynamicMacTable[0], dpoe_DynamicMacTable_GetEntryCount());
+    dpoe_getLlidForwardingState( &linkForwardingState[0], dpoe_LlidForwardingState_GetEntryCount());
+    dpoe_getOamFrameRate(&linkOamFrameRate[0], dpoe_OamFrameRate_GetEntryCount());
+
+    // only if this is dynamically changing
+    dpoe_getOnuPacketBufferCapabilities( &Capabilities );
+}
+#endif
 
 BOOL
 DPoE_GetParamUlongValue
@@ -119,33 +159,63 @@ DPoE_GetParamUlongValue
     }
     else if( AnscEqualString(ParamName, "DynamicMacAddressAgeLimit", TRUE) )
     {
-        if( dpoe_getDynamicMacAddressAgeLimit(puLong) == FAILURE)
+        USHORT value;
+        if( dpoe_getDynamicMacAddressAgeLimit(&value) == FAILURE)
         {
             EPONAGENTLOG(ERROR, "dpoe_getDynamicMacAddressAgeLimit returned with FAILURE\n")
             status = FALSE;
         }
         else
+        {
+            *puLong = (ULONG)value;
+#if 1
+            if ( !*puLong )
+            {
+                *puLong = 1;
+            }
+#endif
             EPONAGENTLOG(INFO, "dpoe_getDynamicMacAddressAgeLimit returned with SUCCESS\n")
+        }
     }
     else if( AnscEqualString(ParamName, "DynamicMacLearningTableSize", TRUE) )
     {
-        if( dpoe_getDynamicMacLearningTableSize(puLong) == FAILURE)
+        USHORT value;
+        if( dpoe_getDynamicMacLearningTableSize(&value) == FAILURE)
         {
             EPONAGENTLOG(ERROR, "dpoe_getDynamicMacLearningTableSize returned with FAILURE\n")
             status = FALSE;
         }
         else
+        {
+            *puLong = (ULONG)value;
+#if 1
+            if ( !*puLong )
+            {
+                *puLong = 1;
+            }
+#endif
             EPONAGENTLOG(INFO, "dpoe_getDynamicMacLearningTableSize returned with SUCCESS\n")
+        }
     }
     else if( AnscEqualString(ParamName, "MacLearningAggregateLimit", TRUE) )
     {
-        if( dpoe_getMacLearningAggregateLimit(puLong) == FAILURE)
+        USHORT value;
+        if( dpoe_getMacLearningAggregateLimit(&value) == FAILURE)
         {
             EPONAGENTLOG(ERROR, "dpoe_getMacLearningAggregateLimit returned with FAILURE\n")
             status = FALSE;
         }
         else
+        {
+            *puLong = (ULONG)value;
+#if 1
+            if ( !*puLong )
+            {
+                *puLong = 1;
+            }
+#endif
             EPONAGENTLOG(INFO, "dpoe_getMacLearningAggregateLimit returned with SUCCESS\n")
+        }
     }
     else
     {
@@ -300,7 +370,11 @@ DPoE_SetParamBoolValue
             status = FALSE;
         }
         else
+        {
+            bOnu_packet_buffer_capabilities_fetched = FALSE;
+            bFirmware_info_fetched = FALSE;
             EPONAGENTLOG(INFO, "dpoe_setClearOnuLinkStatistics returned with SUCCESS\n")
+        }
     }
     else
     {
@@ -405,8 +479,13 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
 )
 {
     BOOL status = RETURN_OK;
-    *pValue = NULL;
+    *pValue = (char)0;
     *pUlSize = 0L;
+    if ( !bFirmware_info_fetched )
+    {
+        status = dpoe_getFirmwareInfo( &FirmwareInfo );
+        bFirmware_info_fetched = TRUE;
+    }
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
@@ -432,6 +511,26 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
             strncpy( pValue, buffer, *pUlSize );
         }
     }
+    else if( AnscEqualString(ParamName, "bootCrc32", TRUE) )
+    {
+        if ( status == RETURN_OK )
+        {
+            char buffer[64] = {0};
+            sprintf(buffer, "%X", FirmwareInfo.info_bootCrc32);
+            *pUlSize = strlen( buffer );
+            strncpy( pValue, buffer, *pUlSize );
+        }
+    }
+    else if( AnscEqualString(ParamName, "appCrc32", TRUE) )
+    {
+        if ( status == RETURN_OK )
+        {
+            char buffer[64] = {0};
+            sprintf(buffer, "%X", FirmwareInfo.info_appCrc32);
+            *pUlSize = strlen( buffer );
+            strncpy( pValue, buffer, *pUlSize );
+        }
+    }
     else
     {
         AnscTraceWarning(("Unsupported parameter '%s'\n", ParamName));
@@ -440,49 +539,6 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
 
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return ( (status == RETURN_OK) ? ANSC_STATUS_SUCCESS : ANSC_STATUS_FAILURE );
-}
-
-BOOL DPoE_FirmwareInfo_GetParamUlongValue
-(
-    ANSC_HANDLE                 hInsContext,
-    char*                       ParamName,
-    ULONG*                      pLong
-)
-{
-    BOOL status = RETURN_OK;
-    *pLong = 0L;
-    if ( !bFirmware_info_fetched )
-    {
-        status = dpoe_getFirmwareInfo( &FirmwareInfo );
-        bFirmware_info_fetched = TRUE;
-    }
-
-    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
-
-    /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "bootCrc32", TRUE) )
-    {
-        if ( status == RETURN_OK )
-        {
-            *pLong = FirmwareInfo.info_bootCrc32;
-        }
-    }
-    else if( AnscEqualString(ParamName, "appCrc32", TRUE) )
-    {
-        if ( status == RETURN_OK )
-        {
-            *pLong = FirmwareInfo.info_appCrc32;
-        }
-    }
-    else
-    {
-        AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
-        status = FALSE;
-    }
-
-    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
-    return ( (status == RETURN_OK) ? TRUE : FALSE );
 }
 
 BOOL DPoE_ChipInfo_GetParamStringValue
@@ -494,7 +550,7 @@ BOOL DPoE_ChipInfo_GetParamStringValue
 )
 {
     BOOL status = RETURN_OK;
-    *pValue = NULL;
+    *pValue = (char)0;
     *pUlSize = 0L;
     if ( !bEpon_chip_info_fetched )
     {
@@ -511,7 +567,7 @@ BOOL DPoE_ChipInfo_GetParamStringValue
         if ( status == RETURN_OK )
         {
             char buffer[64] = {0};
-            sprintf(buffer, "%u", EponChipInfo.info_ChipModel);
+            sprintf(buffer, "%X", EponChipInfo.info_ChipModel);
             *pUlSize = strlen( buffer );
             strncpy( pValue, buffer, *pUlSize );
         }
@@ -521,7 +577,17 @@ BOOL DPoE_ChipInfo_GetParamStringValue
         if ( status == RETURN_OK )
         {
             char buffer[64] = {0};
-            sprintf(buffer, "%u", EponChipInfo.info_ChipVersion);
+            sprintf(buffer, "%X", EponChipInfo.info_ChipVersion);
+            *pUlSize = strlen( buffer );
+            strncpy( pValue, buffer, *pUlSize );
+        }
+    }    
+    else if( AnscEqualString(ParamName, "jedecId", TRUE) )
+    {
+        if ( status == RETURN_OK )
+        {
+            char buffer[64] = {0};
+            sprintf(buffer, "%X", EponChipInfo.info_JedecId);
             *pUlSize = strlen( buffer );
             strncpy( pValue, buffer, *pUlSize );
         }
@@ -536,42 +602,6 @@ BOOL DPoE_ChipInfo_GetParamStringValue
     return ( (status == RETURN_OK) ? ANSC_STATUS_SUCCESS : ANSC_STATUS_FAILURE );
 }
 
-BOOL DPoE_ChipInfo_GetParamUlongValue
-(
-    ANSC_HANDLE                 hInsContext,
-    char*                       ParamName,
-    ULONG*                      pLong
-)
-{
-    BOOL status = RETURN_OK;
-    *pLong = 0L;
-    if ( !bEpon_chip_info_fetched )
-    {
-        status = dpoe_getEponChipInfo( &EponChipInfo );
-        bEpon_chip_info_fetched = TRUE;
-    }
-
-    EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
-
-    /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "jedecId", TRUE) )
-    {
-        if ( status == RETURN_OK )
-        {
-            *pLong = EponChipInfo.info_JedecId;
-        }
-    }
-    else
-    {
-        AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
-        status = FALSE;
-    }
-
-    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
-    return ( (status == RETURN_OK) ? TRUE : FALSE );
-}
-
 BOOL DPoE_ManufacturerInfo_GetParamStringValue
 (
     ANSC_HANDLE                 hInsContext,
@@ -581,7 +611,7 @@ BOOL DPoE_ManufacturerInfo_GetParamStringValue
 )
 {
     BOOL status = RETURN_OK;
-    *pValue = NULL;
+    *pValue = (char)0;
     *pUlSize = 0L;
     if ( !bManufacturer_fetched )
     {
@@ -644,7 +674,7 @@ BOOL DPoE_DeviceSysDescrInfo_GetParamStringValue
 )
 {
     BOOL status = RETURN_OK;
-    *pValue = NULL;
+    *pValue = (char)0;
     *pUlSize = 0L;
     if ( !bDevice_sys_descr_info_fetched )
     {
@@ -764,7 +794,6 @@ BOOL DPoE_OnuPacketBufferCapabilities_GetParamUlongValue
         if ( status == RETURN_OK )
         {
             *puLong = Capabilities.capabilities_DnPacketBuffer;
-//            bOnu_packet_buffer_capabilities_fetched = FALSE;   // last entry, reset for next fetch
         }
     }
     else
@@ -782,10 +811,19 @@ ULONG DPoE_LlidForwardingState_GetEntryCount
     ANSC_HANDLE                 hInsContext
 )
 {
+    int j;
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    AnscTraceWarning(("<%s:%d> Unsupported parameter\n", __FUNCTION__, __LINE__));
+    EPONAGENTLOG(INFO, "    ParamName is: LlidForwardingState_GetEntryCount\n")
+
+#if defined( RUNNING_WITHOUT_TIMER )
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
+    {
+        linkForwardingState[j].link_Id = j;
+    }
+    dpoe_getLlidForwardingState( &linkForwardingState[0], dpoe_LlidForwardingState_GetEntryCount());
+#endif
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return 1;
+    return dpoe_LlidForwardingState_GetEntryCount();
 }
 
 ANSC_HANDLE DPoE_LlidForwardingState_GetEntry
@@ -795,10 +833,18 @@ ANSC_HANDLE DPoE_LlidForwardingState_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
+
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    AnscTraceWarning(("<%s:%d> Unsupported parameter nIndex=%d\n", __FUNCTION__, __LINE__, nIndex));
+    EPONAGENTLOG(INFO, "    ParamName is: LlidForwardingState_GetEntry %d\n", nIndex);
+    
+    *pInsNumber = nIndex + 1;
+    if ( nIndex < dpoe_LlidForwardingState_GetEntryCount() )
+    {
+        pHandle = (ANSC_HANDLE)&linkForwardingState[nIndex];
+    }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return NULL;
+    return pHandle;
 }
 
 BOOL DPoE_LlidForwardingState_GetParamBoolValue
@@ -810,14 +856,18 @@ BOOL DPoE_LlidForwardingState_GetParamBoolValue
 {
     BOOL status = TRUE;
     *pBool = FALSE;
+    dpoe_link_forwarding_state_t *pLink_forwarding_state = (dpoe_link_forwarding_state_t *)hInsContext;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    AnscTraceWarning(("    ***Unsupported parameter '%s'\n", ParamName));
+    EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "forwardingState", TRUE) )
     {
-
+        if ( pLink_forwarding_state )
+        {
+            *pBool = pLink_forwarding_state->link_ForwardingState;
+        }
     }
     else
     {
@@ -828,33 +878,26 @@ BOOL DPoE_LlidForwardingState_GetParamBoolValue
     return status;
 }
 
-BOOL DPoE_LlidForwardingState_GetParamIntValue
+BOOL DPoE_LlidForwardingState_GetParamUlongValue
 (
     ANSC_HANDLE                 hInsContext,
     char*                       ParamName,
-    INT*                        iValue
+    ULONG*                      puLong
 )
 {
-    dpoe_link_forwarding_state_t linkForwardingState[128];
     BOOL status = TRUE;
-    *iValue = 0;
-    int j;
+    *puLong = 0L;
+    dpoe_link_forwarding_state_t *pLink_forwarding_state = (dpoe_link_forwarding_state_t *)hInsContext;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "forwardingState", TRUE) )
+    if( AnscEqualString(ParamName, "link", TRUE) )
     {
-        for ( j = 0; j < 128; j++ )
+        if ( pLink_forwarding_state )
         {
-            linkForwardingState[j].link_Id = j;
-            linkForwardingState[j].link_ForwardingState = FALSE;
-        }
-        status = dpoe_getLlidForwardingState( &linkForwardingState[0], i+1 );
-        if ( (status == RETURN_OK) )
-        {
-           *iValue = linkForwardingState[i].link_ForwardingState ? 1 : 0;
+            *puLong = pLink_forwarding_state->link_Id;
         }
     }
     else
@@ -863,7 +906,7 @@ BOOL DPoE_LlidForwardingState_GetParamIntValue
         status = FALSE;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return ( (status == RETURN_OK) ? TRUE : FALSE );
+    return status;
 }
 
 ULONG DPoE_OamFrameRate_GetEntryCount
@@ -871,10 +914,19 @@ ULONG DPoE_OamFrameRate_GetEntryCount
     ANSC_HANDLE                 hInsContext
 )
 {
+    int j;
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    AnscTraceWarning(("<%s:%d> Unsupported parameter\n", __FUNCTION__, __LINE__));
+    EPONAGENTLOG(INFO, "    ParamName is: OamFrameRate_GetEntryCount\n")
+
+#if defined( RUNNING_WITHOUT_TIMER )
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
+    {
+        linkOamFrameRate[j].link_Id = j;
+    }
+    dpoe_getOamFrameRate(&linkOamFrameRate[0], dpoe_OamFrameRate_GetEntryCount());
+#endif
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return 2;
+    return dpoe_OamFrameRate_GetEntryCount();
 }
 
 ANSC_HANDLE DPoE_OamFrameRate_GetEntry
@@ -884,46 +936,53 @@ ANSC_HANDLE DPoE_OamFrameRate_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    AnscTraceWarning(("<%s:%d> Unsupported parameter nIndex=%d\n", __FUNCTION__, __LINE__, nIndex));
+    EPONAGENTLOG(INFO, "    ParamName is: DPoE_OamFrameRate_GetEntry %d\n", nIndex)
+
+    *pInsNumber = nIndex + 1;
+    if ( nIndex < dpoe_OamFrameRate_GetEntryCount() )
+    {
+        pHandle = (ANSC_HANDLE)&linkOamFrameRate[nIndex];
+    }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return NULL;
+    return pHandle;
 }
 
-BOOL DPoE_OamFrameRate_GetParamIntValue
+BOOL DPoE_OamFrameRate_GetParamUlongValue
 (
     ANSC_HANDLE                 hInsContext,
     char*                       ParamName,
-    INT*                        iValue
+    ULONG*                      puLong
 )
 {
-    dpoe_link_oam_frame_rate_t    linkOamFrameRate[128];
-    BOOL status = TRUE;
-    *iValue = 0;
-    int j;
+    dpoe_link_oam_frame_rate_t    *pLinkOamFrameRate = (dpoe_link_oam_frame_rate_t *)hInsContext;
+    BOOL status = RETURN_OK;
+    *puLong = 0L;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
-    for ( j = 0; j < 128; j++ )
-    {
-        linkOamFrameRate[j].link_Id = j;
-    }
-    status = dpoe_getOamFrameRate(&linkOamFrameRate[0], i+1);
-
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "maxRate", TRUE) )
+    if( AnscEqualString(ParamName, "link", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pLinkOamFrameRate )
         {
-            *iValue = linkOamFrameRate[i].link_MaxRate;
+            *puLong = pLinkOamFrameRate->link_Id + 1;
+        }
+    }
+    else if( AnscEqualString(ParamName, "maxRate", TRUE) )
+    {
+        if ( pLinkOamFrameRate )
+        {
+            *puLong = pLinkOamFrameRate->link_MaxRate;
         }
     }
     else if( AnscEqualString(ParamName, "minRate", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pLinkOamFrameRate )
         {
-            *iValue = linkOamFrameRate[i].link_MinRate;
+            *puLong = pLinkOamFrameRate->link_MinRate;
         }
     }
     else
@@ -940,10 +999,19 @@ ULONG DPoE_DynamicMacTable_GetEntryCount
     ANSC_HANDLE                 hInsContext
 )
 {
+    int j;
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    AnscTraceWarning(("<%s:%d> Unsupported parameter\n", __FUNCTION__, __LINE__));
+    EPONAGENTLOG(INFO, "    ParamName is: DynamicMacTable_GetEntryCount\n")
+
+#if defined( RUNNING_WITHOUT_TIMER )
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
+    {
+        linkDynamicMacTable[j].link = j;
+    }
+    dpoe_getDynamicMacTable(&linkDynamicMacTable[0], dpoe_DynamicMacTable_GetEntryCount());
+#endif
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return 3;
+    return dpoe_DynamicMacTable_GetEntryCount();
 }
 
 ANSC_HANDLE DPoE_DynamicMacTable_GetEntry
@@ -953,10 +1021,18 @@ ANSC_HANDLE DPoE_DynamicMacTable_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
+
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    AnscTraceWarning(("<%s:%d> Unsupported parameter nIndex=%d\n", __FUNCTION__, __LINE__, nIndex));
+    EPONAGENTLOG(INFO, "    ParamName is: DynamicMacTable_GetEntry %d\n", nIndex)
+
+    *pInsNumber = nIndex + 1;
+    if ( nIndex < dpoe_DynamicMacTable_GetEntryCount() )
+    {  
+        pHandle = (ANSC_HANDLE)&linkDynamicMacTable[nIndex];
+    }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return NULL;
+    return pHandle;
 }
 
 BOOL DPoE_DynamicMacTable_GetParamStringValue
@@ -967,28 +1043,23 @@ BOOL DPoE_DynamicMacTable_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
-    dpoe_link_mac_address_t    linkDynamicMacTable[128];
-    BOOL status = RETURN_OK;
-    *pValue = NULL;
+    dpoe_link_mac_address_t    *pLinkDynamicMacTable = (dpoe_link_mac_address_t *)hInsContext;
+    BOOL status = ANSC_STATUS_SUCCESS;
+    *pValue = (char)0;
     *pUlSize = 0L;
     dpoe_link_mac_address_t tDpoe_Mac;
     char macAddress[18] = {0};
-    int j;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
-    for ( j = 0; j < 128; j++ )
-    {
-        linkDynamicMacTable[j].link = j;
-    }
-    status = dpoe_getDynamicMacTable(&linkDynamicMacTable[0], i+1);
-    tDpoe_Mac = linkDynamicMacTable[i];
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "macAddress", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pLinkDynamicMacTable )
         {
+            tDpoe_Mac = *pLinkDynamicMacTable;
+
             sprintf(macAddress, "%02x:%02x:%02x:%02x:%02x:%02x",tDpoe_Mac.macAddress[0], tDpoe_Mac.macAddress[1],
                 tDpoe_Mac.macAddress[2], tDpoe_Mac.macAddress[3], tDpoe_Mac.macAddress[4],tDpoe_Mac.macAddress[5]);
             strcpy( pValue, macAddress);
@@ -998,21 +1069,22 @@ BOOL DPoE_DynamicMacTable_GetParamStringValue
     else
     {
         AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
-        status = FALSE;
+        status = ANSC_STATUS_FAILURE;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
-    return ( (status == RETURN_OK) ? ANSC_STATUS_SUCCESS : ANSC_STATUS_FAILURE );
+    return status;
 }
 
-BOOL DPoE_DynamicMacTable_GetParamIntValue
+BOOL DPoE_DynamicMacTable_GetParamUlongValue
 (
     ANSC_HANDLE                 hInsContext,
     char*                       ParamName,
-    INT*                        iValue
+    ULONG*                      puLong
 )
 {
+    dpoe_link_mac_address_t    *pLinkDynamicMacTable = (dpoe_link_mac_address_t *)hInsContext;
     BOOL status = TRUE;
-    *iValue = 0;
+    *puLong = 0L;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
@@ -1020,11 +1092,15 @@ BOOL DPoE_DynamicMacTable_GetParamIntValue
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "link", TRUE) )
     {
-        *iValue = 1;
+        if ( pLinkDynamicMacTable )
+        {
+            *puLong = pLinkDynamicMacTable->link + 1;
+        }
     }
     else
     {
         AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
+        status = FALSE;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return status;
@@ -1035,10 +1111,19 @@ ULONG DPoE_StaticMacTable_GetEntryCount
     ANSC_HANDLE                 hInsContext
 )
 {
+    int j;
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    AnscTraceWarning(("<%s:%d> Unsupported parameter\n", __FUNCTION__, __LINE__));
+    EPONAGENTLOG(INFO, "    ParamName is: StaticMacTable_GetEntryCount \n")
+
+#if defined( RUNNING_WITHOUT_TIMER )
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
+    {
+        linkStaticMacTable[j].link = j;
+    }
+    dpoe_getStaticMacTable(&linkStaticMacTable[0], dpoe_StaticMacTable_GetEntryCount());
+#endif
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return 4;
+    return dpoe_StaticMacTable_GetEntryCount();
 }
 
 ANSC_HANDLE DPoE_StaticMacTable_GetEntry
@@ -1048,10 +1133,18 @@ ANSC_HANDLE DPoE_StaticMacTable_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
+
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    AnscTraceWarning(("<%s:%d> Unsupported parameter nIndex=%d\n", __FUNCTION__, __LINE__, nIndex));
+    EPONAGENTLOG(INFO, "    ParamName is: StaticMacTable_GetEntry %d\n", nIndex)
+
+    *pInsNumber = nIndex + 1;
+    if ( nIndex < dpoe_StaticMacTable_GetEntryCount() )
+    {
+        pHandle = (ANSC_HANDLE)&linkStaticMacTable[nIndex];
+    }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return NULL;
+    return pHandle;
 }
 
 BOOL DPoE_StaticMacTable_GetParamUlongValue
@@ -1061,6 +1154,7 @@ BOOL DPoE_StaticMacTable_GetParamUlongValue
     ULONG*                      puLong
 )
 {
+    dpoe_link_mac_address_t    *pLinkStaticMacTable = (dpoe_link_mac_address_t *)hInsContext;
     BOOL status = TRUE;
     *puLong = 1;
 
@@ -1070,7 +1164,10 @@ BOOL DPoE_StaticMacTable_GetParamUlongValue
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "link", TRUE) )
     {
-
+        if ( pLinkStaticMacTable )
+        {
+            *puLong = pLinkStaticMacTable->link + 1;
+        }
     }
     else
     {
@@ -1089,28 +1186,23 @@ BOOL DPoE_StaticMacTable_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
-    dpoe_link_mac_address_t    linkStaticMacTable[128];
-    BOOL status = RETURN_OK;
+    dpoe_link_mac_address_t    *pLinkStaticMacTable = (dpoe_link_mac_address_t *)hInsContext;
+    BOOL status = ANSC_STATUS_SUCCESS;
     dpoe_link_mac_address_t    tDpoe_Mac;
     char macAddress[18] = {0};
-    *pValue = NULL;
+    *pValue = (char)0;
     *pUlSize = 0L;
-    int j;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
-    for ( j = 0; j < 128; j++ )
-    {
-        linkStaticMacTable[j].link = j;
-    }
-    status = dpoe_getStaticMacTable(&linkStaticMacTable[0], i+1);
-    tDpoe_Mac = linkStaticMacTable[i];
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "macAddress", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pLinkStaticMacTable )
         {
+            tDpoe_Mac = *pLinkStaticMacTable;
+
             sprintf(macAddress, "%02x:%02x:%02x:%02x:%02x:%02x",tDpoe_Mac.macAddress[0], tDpoe_Mac.macAddress[1],
                 tDpoe_Mac.macAddress[2], tDpoe_Mac.macAddress[3], tDpoe_Mac.macAddress[4],tDpoe_Mac.macAddress[5]);
             strcpy( pValue, macAddress);
@@ -1120,10 +1212,10 @@ BOOL DPoE_StaticMacTable_GetParamStringValue
     else
     {
         AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
-        status = FALSE;
+        status = ANSC_STATUS_FAILURE;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return ( (status == RETURN_OK) ? ANSC_STATUS_SUCCESS : ANSC_STATUS_FAILURE );
+    return status;
 }
 
 ULONG DPoE_OnuLinkStatistics_GetEntryCount
@@ -1132,8 +1224,10 @@ ULONG DPoE_OnuLinkStatistics_GetEntryCount
 )
 {
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "    ParamName is: OnuLinkStatistics_GetEntryCount\n")
+
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return 1; //TODO
+    return dpoe_OnuLinkStatistics_GetEntryCount();
 }
 
 ANSC_HANDLE DPoE_OnuLinkStatistics_GetEntry
@@ -1143,9 +1237,24 @@ ANSC_HANDLE DPoE_OnuLinkStatistics_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
+
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "    ParamName is: OnuLinkStatistics_GetEntry %d\n", nIndex)
+
+#if defined( RUNNING_WITHOUT_TIMER )
+    if ( !nIndex )
+    {
+        dpoe_getOnuLinkStatistics(&onuLinkTrafficStats[0], dpoe_OnuLinkStatistics_GetEntryCount());
+    }
+#endif
+    *pInsNumber = nIndex + 1;
+    if ( nIndex < dpoe_OnuLinkStatistics_GetEntryCount() )
+    {
+        pHandle = (ANSC_HANDLE)&onuLinkTrafficStats[nIndex];
+    }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return ((ANSC_HANDLE)&onuLinkTrafficStats[0]);
+    return pHandle;
 }
 
 BOOL DPoE_OnuLinkStatistics_GetParamUlongValue
@@ -1155,7 +1264,8 @@ BOOL DPoE_OnuLinkStatistics_GetParamUlongValue
     ULONG*                      puLong
 )
 {
-    BOOL status = dpoe_getOnuLinkStatistics(&onuLinkTrafficStats[0], i);
+    dpoe_link_traffic_stats_t    *pOnuLinkTrafficStats = (dpoe_link_traffic_stats_t *)hInsContext;
+    BOOL status = TRUE;
     *puLong = 0L;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
@@ -1164,16 +1274,16 @@ BOOL DPoE_OnuLinkStatistics_GetParamUlongValue
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "rxUnicastFrames", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_RxUnicastFrames;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxUnicastFrames;
         }
     }
     else if( AnscEqualString(ParamName, "txUnicastFrames", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_TxUnicastFrames;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxUnicastFrames;
         }
     }
     else if( AnscEqualString(ParamName, "rxFrameTooShort", TRUE) )
@@ -1185,142 +1295,142 @@ BOOL DPoE_OnuLinkStatistics_GetParamUlongValue
     }
     else if( AnscEqualString(ParamName, "rxFrame64", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_RxFrame64;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame64;
         }
     }
     else if( AnscEqualString(ParamName, "rxFrame65_127", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_RxFrame65_127;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame65_127;
         }
     }
     else if( AnscEqualString(ParamName, "rxFrame128_255", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_RxFrame128_255;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame128_255;
         }
     }
     else if( AnscEqualString(ParamName, "rxFrame256_511", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_RxFrame256_511;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame256_511;
         }
     }
     else if( AnscEqualString(ParamName, "rxFrame512_1023", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_RxFrame512_1023;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame512_1023;
         }
     }
     else if( AnscEqualString(ParamName, "rxFrame1024_1518", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_RxFrame1024_1518;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame1024_1518;
         }
     }
     else if( AnscEqualString(ParamName, "rxFrame1519_Plus", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_RxFrame1519_Plus;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame1519_Plus;
         }
     }
     else if( AnscEqualString(ParamName, "txFrame64", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_TxFrame64;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame64;
         }
     }
     else if( AnscEqualString(ParamName, "txFrame65_127", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_TxFrame65_127;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame65_127;
         }
     }
     else if( AnscEqualString(ParamName, "txFrame128_255", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_TxFrame128_255;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame128_255;
         }
     }
     else if( AnscEqualString(ParamName, "txFrame256_511", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_TxFrame256_511;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame256_511;
         }
     }
     else if( AnscEqualString(ParamName, "txFrame512_1023", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_TxFrame512_1023;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame512_1023;
         }
     }
     else if( AnscEqualString(ParamName, "txFrame_1024_1518", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_TxFrame_1024_1518;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame_1024_1518;
         }
     }
     else if( AnscEqualString(ParamName, "txFrame_1519_Plus", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_TxFrame_1519_Plus;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame_1519_Plus;
         }
     }
     else if( AnscEqualString(ParamName, "framesDropped", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_FramesDropped;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_FramesDropped;
         }
     }
     else if( AnscEqualString(ParamName, "bytesDropped", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_BytesDropped;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_BytesDropped;
         }
     }
     else if( AnscEqualString(ParamName, "opticalMonVcc", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_OpticalMonVcc;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_OpticalMonVcc;
         }
     }
     else if( AnscEqualString(ParamName, "opticalMonTxBiasCurrent", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_OpticalMonTxBiasCurrent;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_OpticalMonTxBiasCurrent;
         }
     }
     else if( AnscEqualString(ParamName, "opticalMonTxPower", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_OpticalMonTxPower;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_OpticalMonTxPower;
         }
     }
     else if( AnscEqualString(ParamName, "opticalMonRxPower", TRUE) )
     {
-        if ( status == RETURN_OK )
+        if ( pOnuLinkTrafficStats )
         {
-            *puLong = onuLinkTrafficStats[i].link_TrafficStats.port_OpticalMonRxPower;
+            *puLong = pOnuLinkTrafficStats->link_TrafficStats.port_OpticalMonRxPower;
         }
     }
     else
@@ -1329,6 +1439,6 @@ BOOL DPoE_OnuLinkStatistics_GetParamUlongValue
         status = FALSE;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
-    return ( (status == RETURN_OK) ? TRUE : FALSE );
+    return status;
 }
 

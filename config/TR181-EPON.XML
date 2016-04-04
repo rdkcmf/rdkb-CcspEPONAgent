@@ -110,7 +110,6 @@
 				<objectType>object</objectType>
 				<functions>
 					<func_GetParamStringValue>DPoE_FirmwareInfo_GetParamStringValue</func_GetParamStringValue>
-					<func_GetParamUlongValue>DPoE_FirmwareInfo_GetParamUlongValue</func_GetParamUlongValue>
 				</functions>
 				<parameters>
 					<parameter>
@@ -122,8 +121,8 @@
 
 					<parameter>
 						<name>bootCrc32</name>
-						<type>unsignedInt</type>
-						<syntax>uint32</syntax>
+						<type>string(64)</type>
+						<syntax>string</syntax>
 						<writable>false</writable>
 					</parameter>
 
@@ -136,8 +135,8 @@
 
 					<parameter>
 						<name>appCrc32</name>
-						<type>unsignedInt</type>
-						<syntax>uint32</syntax>
+						<type>string(64)</type>
+						<syntax>string</syntax>
 						<writable>false</writable>
 					</parameter>
 				</parameters>
@@ -148,13 +147,12 @@
 				<objectType>object</objectType>
 				<functions>
 					<func_GetParamStringValue>DPoE_ChipInfo_GetParamStringValue</func_GetParamStringValue>
-					<func_GetParamUlongValue>DPoE_ChipInfo_GetParamUlongValue</func_GetParamUlongValue>
 				</functions>
 				<parameters>
 					<parameter>
 						<name>jedecId</name>
-						<type>unsignedInt</type>
-						<syntax>uint32</syntax>
+						<type>string(64)</type>
+						<syntax>string</syntax>
 						<writable>false</writable>
 					</parameter>
 
@@ -306,11 +304,18 @@
 				<functions>
 					<func_GetEntryCount>DPoE_LlidForwardingState_GetEntryCount</func_GetEntryCount>
 					<func_GetEntry>DPoE_LlidForwardingState_GetEntry</func_GetEntry>
+					<func_GetParamUlongValue>DPoE_LlidForwardingState_GetParamUlongValue</func_GetParamUlongValue>
 					<func_GetParamBoolValue>DPoE_LlidForwardingState_GetParamBoolValue</func_GetParamBoolValue>
-					<func_GetParamIntValue>DPoE_LlidForwardingState_GetParamIntValue</func_GetParamIntValue>
 				</functions>
 
 				<parameters>
+					<parameter>
+						<name>link</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+					
 					<parameter>
 						<name>forwardingState</name>
 						<type>boolean</type>
@@ -327,12 +332,26 @@
 				<functions>
 					<func_GetEntryCount>DPoE_OamFrameRate_GetEntryCount</func_GetEntryCount>
 					<func_GetEntry>DPoE_OamFrameRate_GetEntry</func_GetEntry>
-					<func_GetParamIntValue>DPoE_OamFrameRate_GetParamIntValue</func_GetParamIntValue>
+					<func_GetParamUlongValue>DPoE_OamFrameRate_GetParamUlongValue</func_GetParamUlongValue>
 				</functions>
 
 				<parameters>
 					<parameter>
+						<name>link</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+					
+					<parameter>
 						<name>maxRate</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+					
+					<parameter>
+						<name>minRate</name>
 						<type>unsignedInt</type>
 						<syntax>uint32</syntax>
 						<writable>false</writable>
@@ -347,8 +366,8 @@
 				<functions>
 					<func_GetEntryCount>DPoE_DynamicMacTable_GetEntryCount</func_GetEntryCount>
 					<func_GetEntry>DPoE_DynamicMacTable_GetEntry</func_GetEntry>
+					<func_GetParamUlongValue>DPoE_DynamicMacTable_GetParamUlongValue</func_GetParamUlongValue>
 					<func_GetParamStringValue>DPoE_DynamicMacTable_GetParamStringValue</func_GetParamStringValue>
-					<func_GetParamIntValue>DPoE_DynamicMacTable_GetParamIntValue</func_GetParamIntValue>
 				</functions>
 
 				<parameters>
