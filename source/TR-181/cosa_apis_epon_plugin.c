@@ -1165,7 +1165,8 @@ ULONG DPoE_DynamicMacTable_GetEntryCount
 
     for ( j = 0; j < uEntryCount; j++ )
     {
-        linkDynamicMacTable[j].link = j+1;
+        linkDynamicMacTable[j].numEntries = j+1;
+        linkDynamicMacTable[j].pMacAddress = NULL;
     }
 
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
@@ -1219,8 +1220,8 @@ BOOL DPoE_DynamicMacTable_GetParamStringValue
     BOOL status = ANSC_STATUS_SUCCESS;
     *pValue = (char)0;
     *pUlSize = 0L;
-    dpoe_link_mac_address_t tDpoe_Mac;
-    char macAddress[18] = {0};
+    dpoe_mac_address_t tDpoe_Mac;
+    char macAddress[19] = {0};
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
@@ -1230,13 +1231,26 @@ BOOL DPoE_DynamicMacTable_GetParamStringValue
     {
         if ( pLinkDynamicMacTable )
         {
-            dpoe_getDynamicMacTable(pLinkDynamicMacTable, 1);
-            tDpoe_Mac = *pLinkDynamicMacTable;
+            int i;
+            USHORT  linkId = pLinkDynamicMacTable->numEntries;
+            char *p = pValue;
 
-            sprintf(macAddress, "%02x:%02x:%02x:%02x:%02x:%02x",tDpoe_Mac.macAddress[0], tDpoe_Mac.macAddress[1],
-                tDpoe_Mac.macAddress[2], tDpoe_Mac.macAddress[3], tDpoe_Mac.macAddress[4],tDpoe_Mac.macAddress[5]);
-            strcpy( pValue, macAddress);
+            dpoe_getDynamicMacTable(pLinkDynamicMacTable, linkId);
+            if ( pLinkDynamicMacTable->pMacAddress )
+            {
+                dpoe_mac_address_t *p2 = pLinkDynamicMacTable->pMacAddress;
+                for ( i = 0; i < pLinkDynamicMacTable->numEntries; i++ )
+                {
+                    tDpoe_Mac = *p2++;
+                    sprintf(p, "%02x:%02x:%02x:%02x:%02x:%02x ",tDpoe_Mac.macAddress[0], tDpoe_Mac.macAddress[1],
+                        tDpoe_Mac.macAddress[2], tDpoe_Mac.macAddress[3], tDpoe_Mac.macAddress[4],tDpoe_Mac.macAddress[5]);
+                    p += 18;
+                }
+                free( pLinkDynamicMacTable->pMacAddress );
+                pLinkDynamicMacTable->pMacAddress = NULL;
+            }
             *pUlSize = strlen(pValue);
+            pLinkDynamicMacTable->numEntries = linkId;
         }
     }
     else
@@ -1267,8 +1281,7 @@ BOOL DPoE_DynamicMacTable_GetParamUlongValue
     {
         if ( pLinkDynamicMacTable )
         {
-            dpoe_getDynamicMacTable(pLinkDynamicMacTable, 1);
-            *puLong = pLinkDynamicMacTable->link;
+            *puLong = pLinkDynamicMacTable->numEntries;
         }
     }
     else
@@ -1305,7 +1318,8 @@ ULONG DPoE_StaticMacTable_GetEntryCount
 
     for ( j = 0; j < uEntryCount; j++ )
     {
-        linkStaticMacTable[j].link = j+1;
+        linkStaticMacTable[j].numEntries = j+1;
+        linkStaticMacTable[j].pMacAddress = NULL;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
     return uEntryCount;
@@ -1365,8 +1379,7 @@ BOOL DPoE_StaticMacTable_GetParamUlongValue
     {
         if ( pLinkStaticMacTable )
         {
-            dpoe_getStaticMacTable(pLinkStaticMacTable, 1);
-            *puLong = pLinkStaticMacTable->link;
+            *puLong = pLinkStaticMacTable->numEntries;
         }
     }
     else
@@ -1388,7 +1401,7 @@ BOOL DPoE_StaticMacTable_GetParamStringValue
 {
     dpoe_link_mac_address_t    *pLinkStaticMacTable = (dpoe_link_mac_address_t *)hInsContext;
     BOOL status = ANSC_STATUS_SUCCESS;
-    dpoe_link_mac_address_t    tDpoe_Mac;
+    dpoe_mac_address_t    tDpoe_Mac;
     char macAddress[18] = {0};
     *pValue = (char)0;
     *pUlSize = 0L;
@@ -1401,13 +1414,27 @@ BOOL DPoE_StaticMacTable_GetParamStringValue
     {
         if ( pLinkStaticMacTable )
         {
-            dpoe_getStaticMacTable(pLinkStaticMacTable, 1);
-            tDpoe_Mac = *pLinkStaticMacTable;
+            int i;
+            USHORT  linkId = pLinkStaticMacTable->numEntries;
+            char *p = pValue;
 
-            sprintf(macAddress, "%02x:%02x:%02x:%02x:%02x:%02x",tDpoe_Mac.macAddress[0], tDpoe_Mac.macAddress[1],
-                tDpoe_Mac.macAddress[2], tDpoe_Mac.macAddress[3], tDpoe_Mac.macAddress[4],tDpoe_Mac.macAddress[5]);
-            strcpy( pValue, macAddress);
+            dpoe_getStaticMacTable(pLinkStaticMacTable, linkId);
+            if ( pLinkStaticMacTable->pMacAddress )
+            {
+                dpoe_mac_address_t *p2 = pLinkStaticMacTable->pMacAddress;
+                for ( i = 0; i < pLinkStaticMacTable->numEntries; i++ )
+                {
+                    tDpoe_Mac = *p2++;
+                    sprintf(p, "%02x:%02x:%02x:%02x:%02x:%02x ",tDpoe_Mac.macAddress[0], tDpoe_Mac.macAddress[1],
+
+                    tDpoe_Mac.macAddress[2], tDpoe_Mac.macAddress[3], tDpoe_Mac.macAddress[4],tDpoe_Mac.macAddress[5]);
+                    p += 18;
+                }
+                free( pLinkStaticMacTable->pMacAddress );
+                pLinkStaticMacTable->pMacAddress = NULL;
+            }
             *pUlSize = strlen(pValue);
+            pLinkStaticMacTable->numEntries = linkId;
         }
     }
     else

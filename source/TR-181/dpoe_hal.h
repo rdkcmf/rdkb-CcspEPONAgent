@@ -126,8 +126,8 @@ typedef struct dpoe_mac_address
 
 typedef struct dpoe_link_mac_address
 {
-	USHORT link;
-	UCHAR macAddress[6];
+    USHORT numEntries;
+    dpoe_mac_address_t *pMacAddress;
 } dpoe_link_mac_address_t;
 
 typedef struct dpoe_firmware_info
@@ -456,6 +456,157 @@ Reference: DPoE-SP-OAMv1.0-I08-140807 specification
 Context: ONU
 */
 INT dpoe_setClearOnuLinkStatistics(void);
+
+/*** Function: dpoe_hal_Reboot_Ready
+Description: Get the Reboot Ready Status
+Parameters:
+ULONG *pValue- Values of 1 for Ready, 2 for Not Ready
+@return the status of the operation.
+@retval RETURN_OK if successful.
+@retval RETURN_ERR if any error is detected
+*/
+INT dpoe_hal_Reboot_Ready(ULONG *pValue);
+
+/*** Function: dpoe_hal_ReinitMac :
+ Description: Reinit DPoE.  Performs reinit MAC only to same DS/US
+ Parameters :
+     None
+
+ @return The status of the operation.
+ @retval RETURN_OK if successful.
+ @retval RETURN_ERR if any error is detected
+
+ @execution Synchronous.
+ @sideeffect None.
+
+ @note This function must not suspend and must not invoke any blocking system
+ calls. It should probably just send a message to a driver event handler task.
+*/
+INT dpoe_hal_ReinitMac();
+
+/*** Function: dpoe_GetProvIpType :
+ Description: Retrieve the provisioned IP type
+ Parameters :
+     CHAR* pValue - ip type currently provisioned
+           values are "IPv4", "IPv6", or "unknown"
+
+ @return The status of the operation.
+ @retval RETURN_OK if successful.
+ @retval RETURN_ERR if any error is detected
+
+ @execution Synchronous.
+ @sideeffect None.
+
+ @note This function must not suspend and must not invoke any blocking system
+ calls. It should probably just send a message to a driver event handler task.
+*/
+//INT dpoe_GetProvIpType(CHAR *pValue);
+//dpoe_If3CmMdCfgIpProvMode - return what the eRouter is using (honor mvd, ipv6, ipv4). Hardcode to IPv6
+
+/*** Function: dpoe_hal_Get_eponResetCount :
+ Description: Retrieve the count of epon resets
+ Parameters :
+    ULONG *resetcnt - Count to be returned
+
+ @return The status of the operation.
+ @retval RETURN_OK if successful.
+ @retval RETURN_ERR if any error is detected
+
+ @execution Synchronous.
+ @sideeffect None.
+
+ @note This function must not suspend and must not invoke any blocking system
+ calls. It should probably just send a message to a driver event handler task.
+*/
+INT dpoe_hal_Get_eponResetCount(ULONG *resetcnt);
+
+/*** Function: dpoe_hal_Get_LocalResetCount :
+ Description: Retrieve the count of local reset
+ Parameters :
+    ULONG *resetcnt - Count to be returned
+
+ @return The status of the operation.
+ @retval RETURN_OK if successful.
+ @retval RETURN_ERR if any error is detected
+
+ @execution Synchronous.
+ @sideeffect None.
+
+ @note This function must not suspend and must not invoke any blocking system
+ calls. It should probably just send a message to a driver event handler task.
+
+*/
+INT dpoe_hal_LocalResetCount(ULONG *resetcnt);
+
+/*** Function:  dpoe_hal_Get_ErouterResetCount :
+ Description: Retrieve the count of erouter reset
+ Parameters :
+    ULONG *resetcnt - Count to be returned
+
+ @return The status of the operation.
+ @retval RETURN_OK if successful.
+ @retval RETURN_ERR if any error is detected
+
+ @execution Synchronous.
+ @sideeffect None.
+
+ @note This function must not suspend and must not invoke any blocking system
+ calls. It should probably just send a message to a driver event handler task.
+*/
+INT dpoe_hal_Get_ErouterResetCount(ULONG *resetcnt);
+
+
+/*** Function:  dpoe_LlidForwardingStateGetEntryCount :
+ Description: Retrieve the count of max logical links
+ Parameters :
+    ULONG *pNumEntry - Count to be returned
+
+ @return The status of the operation.
+ @retval RETURN_OK if successful.
+ @retval RETURN_ERR if any error is detected
+
+ @execution Synchronous.
+ @sideeffect None.
+
+ @note This function must not suspend and must not invoke any blocking system
+ calls. It should probably just send a message to a driver event handler task.
+*/
+INT dpoe_LlidForwardingStateGetEntryCount( USHORT *pNumEntry ); 
+
+/*** Function:  dpoe_OamFrameRateGetEntryCount :
+ Description: Retrieve the count of max logical links
+ Parameters :
+    ULONG *pNumEntry - Count to be returned
+
+ @return The status of the operation.
+ @retval RETURN_OK if successful.
+ @retval RETURN_ERR if any error is detected
+
+ @execution Synchronous.
+ @sideeffect None.
+
+ @note This function must not suspend and must not invoke any blocking system
+ calls. It should probably just send a message to a driver event handler task.
+*/
+INT dpoe_OamFrameRateGetEntryCount( USHORT *pNumEntry );
+
+/*** Function:  dpoe_OnuLinkStatisticsGetEntryCount :
+ Description: Retrieve the count of max logical links
+ Parameters :
+    ULONG *pNumEntry - Count to be returned
+
+ @return The status of the operation.
+ @retval RETURN_OK if successful.
+ @retval RETURN_ERR if any error is detected
+
+ @execution Synchronous.
+ @sideeffect None.
+
+ @note This function must not suspend and must not invoke any blocking system
+ calls. It should probably just send a message to a driver event handler task.
+*/
+INT dpoe_OnuLinkStatisticsGetEntryCount( USHORT *pNumEntry );
+
 
 #endif 
 /** #ifndef __DPOE_HAL_H__ **/
