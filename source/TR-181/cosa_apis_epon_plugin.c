@@ -916,7 +916,7 @@ ULONG DPoE_LlidForwardingState_GetEntryCount
         uEntryCount = MAX_DPOE_DATA_ENTRY;
     }
 
-    for ( j = 0; j < uEntryCount; j++ )
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
     {
         linkForwardingState[j].link_Id = j+1;
     }
@@ -1046,7 +1046,7 @@ ULONG DPoE_OamFrameRate_GetEntryCount
         uEntryCount = MAX_DPOE_DATA_ENTRY;
     }
 
-    for ( j = 0; j < uEntryCount; j++ )
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
     {
         linkOamFrameRate[j].link_Id = j+1;
     }
@@ -1155,7 +1155,7 @@ ULONG DPoE_DynamicMacTable_GetEntryCount
 //    if ( dpoe_DynamicMacTableGetEntryCount( &uEntryCount ) != RETURN_OK )
     if ( dpoe_getNumberOfS1Interfaces( &uEntryCount ) == RETURN_ERR )
     {
-        uEntryCount = 0;
+        uEntryCount = 1;
     }
 
     if ( uEntryCount > MAX_DPOE_DATA_ENTRY )
@@ -1163,7 +1163,7 @@ ULONG DPoE_DynamicMacTable_GetEntryCount
         uEntryCount = MAX_DPOE_DATA_ENTRY;
     }
 
-    for ( j = 0; j < uEntryCount; j++ )
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
     {
         linkDynamicMacTable[j].numEntries = j+1;
         linkDynamicMacTable[j].pMacAddress = NULL;
@@ -1192,7 +1192,7 @@ ANSC_HANDLE DPoE_DynamicMacTable_GetEntry
 //    if ( dpoe_DynamicMacTableGetEntryCount( &uEntryCount ) != RETURN_OK )
     if ( dpoe_getNumberOfS1Interfaces( &uEntryCount ) == RETURN_ERR )
     {
-        uEntryCount = 0;
+        uEntryCount = 1;
     }
 
     if ( uEntryCount > MAX_DPOE_DATA_ENTRY )
@@ -1308,7 +1308,7 @@ ULONG DPoE_StaticMacTable_GetEntryCount
 //    if ( dpoe_StaticMacTableGetEntryCount( &uEntryCount ) != RETURN_OK )
     if ( dpoe_getNumberOfS1Interfaces( &uEntryCount ) == RETURN_ERR )
     {
-        uEntryCount = 0;
+        uEntryCount = 1;
     }
 
     if ( uEntryCount > MAX_DPOE_DATA_ENTRY )
@@ -1316,7 +1316,7 @@ ULONG DPoE_StaticMacTable_GetEntryCount
         uEntryCount = MAX_DPOE_DATA_ENTRY;
     }
 
-    for ( j = 0; j < uEntryCount; j++ )
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
     {
         linkStaticMacTable[j].numEntries = j+1;
         linkStaticMacTable[j].pMacAddress = NULL;
@@ -1344,7 +1344,7 @@ ANSC_HANDLE DPoE_StaticMacTable_GetEntry
 //    if ( dpoe_StaticMacTableGetEntryCount( &uEntryCount ) != RETURN_OK )
     if ( dpoe_getNumberOfS1Interfaces( &uEntryCount ) == RETURN_ERR )
     {
-        uEntryCount = 0;
+        uEntryCount = 1;
     }
 
     if ( uEntryCount > MAX_DPOE_DATA_ENTRY )
@@ -1467,7 +1467,7 @@ ULONG DPoE_OnuLinkStatistics_GetEntryCount
       uEntryCount = MAX_DPOE_DATA_ENTRY;
     }
 
-    for ( j = 0; j < uEntryCount; j++ )
+    for ( j = 0; j < MAX_DPOE_DATA_ENTRY; j++ )
     {
         onuLinkTrafficStats[j].link_Id = j+1;
     }
