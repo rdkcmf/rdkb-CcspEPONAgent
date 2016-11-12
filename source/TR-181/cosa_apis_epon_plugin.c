@@ -921,7 +921,7 @@ ULONG DPoE_LlidForwardingState_GetEntryCount
         linkForwardingState[j].link_Id = j+1;
     }
 
-    EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "Exiting from <%s> uEntryCount = %d\n\n", __FUNCTION__, uEntryCount)
     return (ULONG)uEntryCount;
 }
 
@@ -952,12 +952,12 @@ ANSC_HANDLE DPoE_LlidForwardingState_GetEntry
     if ( nIndex < uEntryCount )
     {
         dpoe_getLlidForwardingState( &linkForwardingState[nIndex], 1);
-        if ( linkForwardingState[nIndex].link_ForwardingState )
+//        if ( linkForwardingState[nIndex].link_ForwardingState )
         {
             pHandle = (ANSC_HANDLE)&linkForwardingState[nIndex];
         }
     }
-    EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "Exiting from <%s> pHandle = %p link_ForwardingState = %d\n\n", __FUNCTION__, pHandle, linkForwardingState[nIndex].link_ForwardingState)
     return pHandle;
 }
 
@@ -973,14 +973,14 @@ BOOL DPoE_LlidForwardingState_GetParamBoolValue
     dpoe_link_forwarding_state_t *pLink_forwarding_state = (dpoe_link_forwarding_state_t *)hInsContext;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
+    EPONAGENTLOG(INFO, "    ParamName is: %s pLink_forwarding_state = %p\n", ParamName, pLink_forwarding_state)
 
     /* check the parameter name and return the corresponding value */
     if( AnscEqualString(ParamName, "forwardingState", TRUE) )
     {
         if ( pLink_forwarding_state )
         {
-//            dpoe_getLlidForwardingState( pLink_forwarding_state, 1);
+            dpoe_getLlidForwardingState( pLink_forwarding_state, 1);
             *pBool = pLink_forwarding_state->link_ForwardingState;
         }
     }
@@ -989,7 +989,7 @@ BOOL DPoE_LlidForwardingState_GetParamBoolValue
         AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
         status = FALSE;
     }
-    EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "Exiting from <%s> index = %d forwardingState = %d status = %d\n", __FUNCTION__, pLink_forwarding_state->link_Id, *pBool, status)
     return status;
 }
 
@@ -1051,7 +1051,7 @@ ULONG DPoE_OamFrameRate_GetEntryCount
         linkOamFrameRate[j].link_Id = j+1;
     }
 
-    EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "Exiting from <%s> uEntryCount = %d\n\n", __FUNCTION__, uEntryCount)
     return (ULONG)uEntryCount;
 }
 
@@ -1073,6 +1073,7 @@ ANSC_HANDLE DPoE_OamFrameRate_GetEntry
     if ( dpoe_OamFrameRateGetEntryCount( &uEntryCount ) != RETURN_OK )
     {
         uEntryCount = 0;
+        EPONAGENTLOG(INFO, "  dpoe_OamFrameRateGetEntryCount return failure.  uEntryCount = %d\n", uEntryCount)
     }
 
     if ( uEntryCount > MAX_DPOE_DATA_ENTRY )
@@ -1083,12 +1084,12 @@ ANSC_HANDLE DPoE_OamFrameRate_GetEntry
     if ( nIndex < uEntryCount )
     {
         dpoe_getLlidForwardingState( &linkForwardingState[nIndex], 1);
-        if ( linkForwardingState[nIndex].link_ForwardingState )
+//        if ( linkForwardingState[nIndex].link_ForwardingState )
         {
             pHandle = (ANSC_HANDLE)&linkOamFrameRate[nIndex];
         }
     }
-    EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "Exiting from <%s> nIndex = %d uEntryCount = %d pHandle = %p link_ForwardingState = %d\n\n", __FUNCTION__, nIndex, uEntryCount, pHandle, linkForwardingState[nIndex].link_ForwardingState)
     return pHandle;
 }
 
@@ -1136,7 +1137,7 @@ BOOL DPoE_OamFrameRate_GetParamUlongValue
         AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
         status = FALSE;
     }
-    EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
+    EPONAGENTLOG(INFO, "Exiting from <%s> puLong = %d return = %d\n\n", __FUNCTION__, *puLong, ( (status == RETURN_OK) ? TRUE : FALSE ) )
     return ( (status == RETURN_OK) ? TRUE : FALSE );
 }
 
