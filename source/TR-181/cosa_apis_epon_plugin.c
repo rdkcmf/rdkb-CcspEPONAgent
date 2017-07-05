@@ -957,6 +957,15 @@ ANSC_HANDLE DPoE_LlidForwardingState_GetEntry
             pHandle = (ANSC_HANDLE)&linkForwardingState[nIndex];
         }
     }
+    /* Fix 'out of bounds read'.
+     * From the above, nIndex could potentially be MAX_DPOE_DATA_ENTRY.
+     * If so, reduce by 1 for array offset and avoid out of bounds read.
+     */
+    else if (nIndex >= MAX_DPOE_DATA_ENTRY)
+    {
+        EPONAGENTLOG(INFO, "  nIndex %d exceeds array range, reduce to %d.", nIndex, nIndex-1)
+        nIndex = MAX_DPOE_DATA_ENTRY - 1;
+    }
     EPONAGENTLOG(INFO, "Exiting from <%s> pHandle = %p link_ForwardingState = %d\n\n", __FUNCTION__, pHandle, linkForwardingState[nIndex].link_ForwardingState)
     return pHandle;
 }
@@ -1088,6 +1097,15 @@ ANSC_HANDLE DPoE_OamFrameRate_GetEntry
         {
             pHandle = (ANSC_HANDLE)&linkOamFrameRate[nIndex];
         }
+    }
+    /* Fix 'out of bounds read'.
+     * From the above, nIndex could potentially be MAX_DPOE_DATA_ENTRY.
+     * If so, reduce by 1 for array offset and avoid out of bounds read.
+     */
+    else if (nIndex >= MAX_DPOE_DATA_ENTRY)
+    {
+        EPONAGENTLOG(INFO, "  nIndex %d exceeds array range, reduce to %d.", nIndex, nIndex-1)
+        nIndex = MAX_DPOE_DATA_ENTRY - 1;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s> nIndex = %d uEntryCount = %d pHandle = %p link_ForwardingState = %d\n\n", __FUNCTION__, nIndex, uEntryCount, pHandle, linkForwardingState[nIndex].link_ForwardingState)
     return pHandle;
