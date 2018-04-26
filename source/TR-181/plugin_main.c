@@ -48,9 +48,13 @@
 #include "ansc_load_library.h"
 #include "cosa_plugin_api.h"
 #include "plugin_main.h"
+#include "plugin_main_apis.h"
 #include "cosa_apis_epon_plugin.h"
+#include "cosa_device_info_dml.h"
 
 #define THIS_PLUGIN_VERSION                         1
+
+PCOSA_BACKEND_MANAGER_OBJECT g_pCosaBEManager = NULL;
 
 int ANSC_EXPORT_API
 COSA_Init
@@ -108,6 +112,21 @@ COSA_Init
     pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DPoE_OnuLinkStatistics_GetEntryCount", DPoE_OnuLinkStatistics_GetEntryCount);
     pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DPoE_OnuLinkStatistics_GetEntry", DPoE_OnuLinkStatistics_GetEntry);
     pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DPoE_OnuLinkStatistics_GetParamUlongValue", DPoE_OnuLinkStatistics_GetParamUlongValue);
+    pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DeviceInfo_GetParamBoolValue",  DeviceInfo_GetParamBoolValue);
+    pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DeviceInfo_GetParamStringValue",  DeviceInfo_GetParamStringValue);
+    pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DeviceInfo_SetParamBoolValue",  DeviceInfo_SetParamBoolValue);
+    pPlugInfo->RegisterFunction(pPlugInfo->hContext, "DeviceInfo_SetParamStringValue",  DeviceInfo_SetParamStringValue);
+
+
+    /* Create backend framework */
+    g_pCosaBEManager = (PCOSA_BACKEND_MANAGER_OBJECT)CosaBackEndManagerCreate();
+
+    if ( g_pCosaBEManager && g_pCosaBEManager->Initialize )
+    {
+        g_pCosaBEManager->hCosaPluginInfo = pPlugInfo;
+
+        g_pCosaBEManager->Initialize   ((ANSC_HANDLE)g_pCosaBEManager);
+    }
 
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return  0;
