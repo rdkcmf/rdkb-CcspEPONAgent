@@ -313,6 +313,7 @@ void FWDL_ThreadFunc()
 	    
 	pthread_detach(pthread_self());
 
+        CcspTraceInfo((" Waiting for FW DL ... \n"));
         ret = cm_hal_HTTP_Download ();
         if( ret == RETURN_ERR)
         {
@@ -320,7 +321,6 @@ void FWDL_ThreadFunc()
         }
         else
         {
-                CcspTraceInfo(("Image downloading triggered successfully \n"));
                 ret = RETURN_ERR;
 
         	/* Sleeping since the status returned is 500 on immediate status query */
@@ -341,7 +341,6 @@ void FWDL_ThreadFunc()
         		CcspTraceInfo(("/tmp/wget.log created . Continue ...\n"));
 	        }
 
-        	CcspTraceInfo((" Waiting for FW DL ... \n"));
 	        while(1)
 	        {
 		        dl_status = cm_hal_Get_HTTP_Download_Status();
@@ -358,6 +357,7 @@ void FWDL_ThreadFunc()
 	        }
 
         	CcspTraceInfo((" FW DL is over \n"));
+                CcspTraceInfo(("Image downloaded successfully \n"));
 
 	        CcspTraceInfo((" Waiting for reboot ready ... \n"));
         	while(1)
