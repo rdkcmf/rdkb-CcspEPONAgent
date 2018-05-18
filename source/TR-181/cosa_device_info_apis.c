@@ -314,6 +314,10 @@ void FWDL_ThreadFunc()
 	pthread_detach(pthread_self());
 
         CcspTraceInfo((" Waiting for FW DL ... \n"));
+
+        /* XF3-3359 : Adding print statement as requested by automation team */
+        CcspTraceInfo(("Image downloading triggered successfully \n"));
+
         ret = cm_hal_HTTP_Download ();
         if( ret == RETURN_ERR)
         {
