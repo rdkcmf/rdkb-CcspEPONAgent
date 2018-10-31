@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ If not stated otherwise in this file or this component's Licenses.txt file the
+ following copyright and licenses apply:
+
+ Copyright 2016 RDK Management
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<dataModelInfo>
+  <version>1</version>
+  <moduleName>CCSP EPON Agent</moduleName>
+  <author>Fiber Optics</author>
+  <description>COSA TR181 and extension for EPON</description>
+
+  <library>
+    <path>libepon_tr181</path>
+    <func_Init>COSA_Init</func_Init>
+    <func_Async_Init>COSA_Async_Init</func_Async_Init>
+    <func_Unload>COSA_Unload</func_Unload>
+    <func_MemoryCheck>COSA_MemoryCheck</func_MemoryCheck>
+    <func_MemoryUsage>COSA_MemoryUsage</func_MemoryUsage>
+    <func_MemoryTable>COSA_MemoryTable</func_MemoryTable>
+  </library>
+
+  <objects>
+    <object>
+
+      <name>DPoE</name>
+
+      <objectType>object</objectType>
+		<functions>
+			<func_GetParamBoolValue>DPoE_GetParamBoolValue</func_GetParamBoolValue>
+			<func_GetParamIntValue>DPoE_GetParamIntValue</func_GetParamIntValue>
+			<func_GetParamUlongValue>DPoE_GetParamUlongValue</func_GetParamUlongValue>
+			<func_GetParamStringValue>DPoE_GetParamStringValue</func_GetParamStringValue>
+			<func_SetParamBoolValue>DPoE_SetParamBoolValue</func_SetParamBoolValue>
+			<func_SetParamIntValue>DPoE_SetParamIntValue</func_SetParamIntValue>
+			<func_SetParamUlongValue>DPoE_SetParamUlongValue</func_SetParamUlongValue>
+			<func_SetParamStringValue>DPoE_SetParamStringValue</func_SetParamStringValue>
+			<func_Validate>DPoE_Validate</func_Validate>
+			<func_Commit>DPoE_Commit</func_Commit>
+			<func_Rollback>DPoE_Rollback</func_Rollback>
+		</functions>
+		<parameters>
+			<parameter>
+				<name>Mac_address</name>
+				<type>string(64)</type>
+				<syntax>string</syntax>
+				<writable>false</writable>
+			</parameter>
+			<parameter>
+				<name>NumberOfNetworkPorts</name>
+				<type>unsignedInt</type>
+				<syntax>uint32</syntax>
+				<writable>false</writable>
+			</parameter>
+			<parameter>
+				<name>NumberOfS1Interfaces</name>
+				<type>unsignedInt</type>
+				<syntax>uint32</syntax>
+				<writable>false</writable>
+			</parameter>
+			<parameter>
+				<name>ResetOnu</name>
+				<type>boolean</type>
+				<syntax>bool</syntax>
+				<writable>true</writable>
+			</parameter>
+			<parameter>
+				<name>DynamicMacAddressAgeLimit</name>
+				<type>unsignedInt</type>
+				<syntax>uint32</syntax>
+				<writable>false</writable>
+			</parameter>
+			<parameter>
+				<name>DynamicMacLearningTableSize</name>
+				<type>unsignedInt</type>
+				<syntax>uint32</syntax>
+				<writable>false</writable>
+			</parameter>
+			<parameter>
+				<name>MacLearningAggregateLimit</name>
+				<type>unsignedInt</type>
+				<syntax>uint32</syntax>
+				<writable>false</writable>
+			</parameter>
+			<parameter>
+				<name>ClearOnuLinkStatistics</name>
+				<type>boolean</type>
+				<syntax>bool</syntax>
+				<writable>true</writable>
+			</parameter>
+		</parameters>
+		<objects>
+			<object>
+				<name>DPoE_FirmwareInfo</name>
+				<objectType>object</objectType>
+				<functions>
+					<func_GetParamStringValue>DPoE_FirmwareInfo_GetParamStringValue</func_GetParamStringValue>
+				</functions>
+				<parameters>
+					<parameter>
+						<name>bootVersion</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>bootCrc32</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>appVersion</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>appCrc32</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+
+			<object>
+				<name>DPoE_ChipInfo</name>
+				<objectType>object</objectType>
+				<functions>
+					<func_GetParamStringValue>DPoE_ChipInfo_GetParamStringValue</func_GetParamStringValue>
+				</functions>
+				<parameters>
+					<parameter>
+						<name>jedecId</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>chipModel</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>chipVersion</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+
+			<object>
+				<name>DPoE_ManufacturerInfo</name>
+				<objectType>object</objectType>
+				<functions>
+					<func_GetParamStringValue>DPoE_ManufacturerInfo_GetParamStringValue</func_GetParamStringValue>
+				</functions>
+				<parameters>
+					<parameter>
+						<name>info</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>organizationName</name>
+						<type>string(256)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>manufacturerDate</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+
+			<object>
+				<name>DPoE_DeviceSysDescrInfo</name>
+				<objectType>object</objectType>
+				<functions>
+					<func_GetParamStringValue>DPoE_DeviceSysDescrInfo_GetParamStringValue</func_GetParamStringValue>
+				</functions>
+				<parameters>
+					<parameter>
+						<name>vendorName</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>modelNumber</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>hardwareVersion</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+
+			<object>
+				<name>DPoE_OnuPacketBufferCapabilities</name>
+				<objectType>object</objectType>
+				<functions>
+					<func_GetParamUlongValue>DPoE_OnuPacketBufferCapabilities_GetParamUlongValue</func_GetParamUlongValue>
+				</functions>
+				<parameters>
+					<parameter>
+						<name>upstreamQueues</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>upQueuesMaxPerLink</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>upQueueIncrement</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>downstreamQueues</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>dnQueuesMaxPerPort</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>dnQueueIncrement</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>totalPacketBuffer</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>dnPacketBuffer</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+
+			<object>
+				<name>DPoE_LlidForwardingState</name>
+				<objectType>staticTable</objectType>
+				<maxInstance>32</maxInstance>
+				<functions>
+					<func_GetEntryCount>DPoE_LlidForwardingState_GetEntryCount</func_GetEntryCount>
+					<func_GetEntry>DPoE_LlidForwardingState_GetEntry</func_GetEntry>
+					<func_GetParamUlongValue>DPoE_LlidForwardingState_GetParamUlongValue</func_GetParamUlongValue>
+					<func_GetParamBoolValue>DPoE_LlidForwardingState_GetParamBoolValue</func_GetParamBoolValue>
+				</functions>
+
+				<parameters>
+					<parameter>
+						<name>link</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+					
+					<parameter>
+						<name>forwardingState</name>
+						<type>boolean</type>
+						<syntax>bool</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+
+			<object>
+				<name>DPoE_OamFrameRate</name>
+				<objectType>staticTable</objectType>
+				<maxInstance>32</maxInstance>
+				<functions>
+					<func_GetEntryCount>DPoE_OamFrameRate_GetEntryCount</func_GetEntryCount>
+					<func_GetEntry>DPoE_OamFrameRate_GetEntry</func_GetEntry>
+					<func_GetParamUlongValue>DPoE_OamFrameRate_GetParamUlongValue</func_GetParamUlongValue>
+				</functions>
+
+				<parameters>
+					<parameter>
+						<name>link</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+					
+					<parameter>
+						<name>maxRate</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+					
+					<parameter>
+						<name>minRate</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+
+			<object>
+				<name>DPoE_DynamicMacTable</name>
+				<objectType>staticTable</objectType>
+				<maxInstance>32</maxInstance>
+				<functions>
+					<func_GetEntryCount>DPoE_DynamicMacTable_GetEntryCount</func_GetEntryCount>
+					<func_GetEntry>DPoE_DynamicMacTable_GetEntry</func_GetEntry>
+					<func_GetParamUlongValue>DPoE_DynamicMacTable_GetParamUlongValue</func_GetParamUlongValue>
+					<func_GetParamStringValue>DPoE_DynamicMacTable_GetParamStringValue</func_GetParamStringValue>
+				</functions>
+
+				<parameters>
+					<parameter>
+						<name>link</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>macAddress</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+
+			<object>
+				<name>DPoE_StaticMacTable</name>
+				<objectType>staticTable</objectType>
+				<maxInstance>32</maxInstance>
+				<functions>
+					<func_GetEntryCount>DPoE_StaticMacTable_GetEntryCount</func_GetEntryCount>
+					<func_GetEntry>DPoE_StaticMacTable_GetEntry</func_GetEntry>
+					<func_GetParamUlongValue>DPoE_StaticMacTable_GetParamUlongValue</func_GetParamUlongValue>
+					<func_GetParamStringValue>DPoE_StaticMacTable_GetParamStringValue</func_GetParamStringValue>
+				</functions>
+
+				<parameters>
+					<parameter>
+						<name>link</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>macAddress</name>
+						<type>string(64)</type>
+						<syntax>string</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+
+			<object>
+				<name>DPoE_OnuLinkStatistics</name>
+				<objectType>staticTable</objectType>
+				<maxInstance>32</maxInstance>
+				<functions>
+					<func_GetEntryCount>DPoE_OnuLinkStatistics_GetEntryCount</func_GetEntryCount>
+					<func_GetEntry>DPoE_OnuLinkStatistics_GetEntry</func_GetEntry>
+					<func_GetParamUlongValue>DPoE_OnuLinkStatistics_GetParamUlongValue</func_GetParamUlongValue>
+				</functions>
+
+				<parameters>
+					<parameter>
+						<name>rxUnicastFrames</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>txUnicastFrames</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>rxFrameTooShort</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>rxFrame64</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>rxFrame65_127</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>rxFrame128_255</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>rxFrame256_511</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>rxFrame512_1023</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>rxFrame1024_1518</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>rxFrame1519_Plus</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>txFrame64</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>txFrame65_127</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>txFrame128_255</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>txFrame256_511</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>txFrame512_1023</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>txFrame_1024_1518</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>txFrame_1519_Plus</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>framesDropped</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>bytesDropped</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>opticalMonVcc</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>opticalMonTxBiasCurrent</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>opticalMonTxPower</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+
+					<parameter>
+						<name>opticalMonRxPower</name>
+						<type>unsignedInt</type>
+						<syntax>uint32</syntax>
+						<writable>false</writable>
+					</parameter>
+				</parameters>
+			</object>
+	</objects>
+
+    </object>
+
+    <object>
+
+	<name>DeviceInfo</name>
+
+	<objectType>object</objectType>
+
+	<functions>
+
+		<func_GetParamBoolValue>DeviceInfo_GetParamBoolValue</func_GetParamBoolValue>
+
+		<func_GetParamStringValue>DeviceInfo_GetParamStringValue</func_GetParamStringValue>
+
+		<func_SetParamBoolValue>DeviceInfo_SetParamBoolValue</func_SetParamBoolValue>
+
+		<func_SetParamStringValue>DeviceInfo_SetParamStringValue</func_SetParamStringValue>
+
+	</functions>
+
+	<parameters>
+
+		<parameter>
+
+			<name>X_RDKCENTRAL-COM_FirmwareDownloadStatus</name>
+
+			<type>string</type>
+
+			<syntax>string</syntax>
+
+		</parameter>
+
+		<parameter>
+
+			<name>X_RDKCENTRAL-COM_FirmwareDownloadProtocol</name>
+
+			<type>string</type>
+
+			<syntax>string</syntax>
+
+		</parameter>
+
+		<parameter>
+
+			<name>X_RDKCENTRAL-COM_FirmwareDownloadURL</name>
+
+			<type>string</type>
+
+			<syntax>string</syntax>
+
+			<writable>true</writable>
+
+		</parameter>
+
+		<parameter>
+
+			<name>X_RDKCENTRAL-COM_FirmwareToDownload</name>
+
+			<type>string</type>
+
+			<syntax>string</syntax>
+
+			<writable>true</writable>
+
+		</parameter>
+
+		<parameter>
+
+			<name>X_RDKCENTRAL-COM_FirmwareDownloadNow</name>
+
+			<type>boolean</type>
+
+			<syntax>bool</syntax>
+
+			<writable>true</writable>
+
+		</parameter>
+
+	</parameters>
+
+    </object>
+
+  </objects>
+
+</dataModelInfo>
