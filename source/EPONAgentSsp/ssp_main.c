@@ -43,6 +43,10 @@
 #include "stdlib.h"
 #include "ccsp_dm_api.h"
 
+#ifdef INCLUDE_BREAKPAD
+#include "breakpad_wrapper.h"
+#endif
+
 PCCSP_COMPONENT_CFG gpEponStartCfg = NULL;
 
 extern char* pComponentName;
@@ -352,6 +356,9 @@ int main(int argc, char* argv[])
     fputs(cmd, fd);
     fclose(fd);
 
+#ifdef INCLUDE_BREAKPAD
+    breakpad_ExceptionHandler();
+#else
     if (is_core_dump_opened())
     {
         signal(SIGUSR1, sig_handler);
@@ -375,7 +382,7 @@ int main(int argc, char* argv[])
         signal(SIGQUIT, sig_handler);
         signal(SIGHUP, sig_handler);
     }
-
+#endif
     cmd_dispatch('e');
 
 #ifdef _COSA_SIM_
