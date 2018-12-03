@@ -1503,7 +1503,7 @@ ANSC_HANDLE DPoE_OnuLinkStatistics_GetEntry
     if ( nIndex < uEntryCount )
     {
         dpoe_getLlidForwardingState( &linkForwardingState[nIndex], 1);
-        if ( linkForwardingState[nIndex].link_ForwardingState )
+        /* if ( linkForwardingState[nIndex].link_ForwardingState ) */
         {
             pHandle = (ANSC_HANDLE)&onuLinkTrafficStats[nIndex];
         }
