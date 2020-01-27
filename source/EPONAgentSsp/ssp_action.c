@@ -27,6 +27,7 @@
 #include "ssp_global.h"
 #include "dslh_dmagnt_interface.h"
 #include "ccsp_trace.h"
+#include "dm_pack_create_func.h"
 
 /*----------------------------------------------------------------------------*/
 /*                                   Macros                                   */
@@ -196,11 +197,11 @@ ANSC_STATUS ssp_engage
     EPONAGENTLOG(INFO, "Registering CcspDataModel with following parameters\nCrName: <%s>\npXmlCfgList->FileList[0]: <%s>\npStartCfg->ComponentName: <%s>\npStartCfg->DbusPath: %s\ng_Subsystem: %s\n", CrName, pXmlCfgList->FileList[0], pStartCfg->ComponentName, pStartCfg->DbusPath, g_Subsystem)
 
 	returnStatus =
-	    pDslhCpeController->RegisterCcspDataModel
+	    pDslhCpeController->RegisterCcspDataModel2
 		    (
 		        (ANSC_HANDLE)pDslhCpeController,
 		        CrName,                             /* CCSP CR ID */
-		        pXmlCfgList->FileList[0],           /* Data Model XML file. Can be empty if only base data model supported. */
+			DMPackCreateDataModelXML,           /* Data Model XML file. Can be empty if only base data model supported. */
 		        pStartCfg->ComponentName,           /* Component Name    */
 		        pStartCfg->Version,                 /* Component Version */
 		        pStartCfg->DbusPath,                /* Component Path    */
