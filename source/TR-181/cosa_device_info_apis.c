@@ -68,6 +68,8 @@
 
 //!!!  This code assumes that all data structures are the SAME in middle-layer APIs and HAL layer APIs
 //!!!  So it uses casting from one to the other
+#define _GNU_SOURCE
+#include <string.h>
 #include "cosa_device_info_apis.h"
 #include "cm_hal.h"
 #include "cosa_device_info_internal.h"
@@ -79,6 +81,7 @@ CosaDmlDIInit
         PANSC_HANDLE                phContext
     )
 {
+	UNREFERENCED_PARAMETER(hDml);
     PCOSA_DATAMODEL_DEVICEINFO      pMyObject    = (PCOSA_DATAMODEL_DEVICEINFO)phContext;
 
     CosaDmlDIGetDLFlag((ANSC_HANDLE)pMyObject);
@@ -108,7 +111,7 @@ ANSC_STATUS CosaDmlDIGetDLFlag(ANSC_HANDLE hContext)
 		if(strstr(buff, "BUILD_TYPE") != NULL) 
 		{
 		//RDKB-22703: Enabled support to allow TR-181 firmware download on PROD builds.
-			if((strcasestr(buff, "dev") != NULL) || (strcasestr(buff, "vbn") != NULL) || (strcasestr(buff, "prod") != NULL))
+			if((strcasestr(buff, "dev")) || (strcasestr(buff, "vbn")) || (strcasestr(buff, "prod")))
 			{
 				pMyObject->Download_Control_Flag = TRUE;
 				break;
@@ -160,6 +163,7 @@ ANSC_STATUS CosaDmlDIGetFWVersion(ANSC_HANDLE hContext)
 
 ANSC_STATUS CosaDmlDIGetDLStatus(ANSC_HANDLE hContext, char *DL_Status)
 {
+	UNREFERENCED_PARAMETER(hContext);
 	int dl_status = 0;
 	
 	dl_status = cm_hal_Get_HTTP_Download_Status();
@@ -334,8 +338,9 @@ ANSC_STATUS CosaDmlDISetImage(ANSC_HANDLE hContext, char *Image)
 	return ANSC_STATUS_SUCCESS;	
 }
 
-void FWDL_ThreadFunc()
+void *FWDL_ThreadFunc(void *arg)
 {
+	UNREFERENCED_PARAMETER(arg);
 	int dl_status = 0;
 	int ret = RETURN_ERR;
 	ULONG reboot_ready_status = 0;
@@ -386,7 +391,7 @@ void FWDL_ThreadFunc()
         		else if(dl_status >= 400)
 		        {
 			        CcspTraceError((" FW DL is failed with status %d \n", dl_status));
-			        return;
+			        return NULL;
 		        }
 	        }
 
@@ -405,8 +410,10 @@ void FWDL_ThreadFunc()
         	}
 	        CcspTraceInfo((" Waiting for reboot ready over, setting last reboot reason \n"));
 
-        	system("dmcli eRT setv Device.DeviceInfo.X_RDKCENTRAL-COM_LastRebootReason string Forced_Software_upgrade");
-
+            if (system("dmcli eRT setv Device.DeviceInfo.X_RDKCENTRAL-COM_LastRebootReason string Forced_Software_upgrade") == -1 )
+            {
+                CcspTraceError(("Failed to set LastRebootReason.\n"));
+            }
         	ret = RETURN_ERR;
 	        ret = cm_hal_HTTP_Download_Reboot_Now();
 
@@ -419,9 +426,10 @@ void FWDL_ThreadFunc()
 		        CcspTraceError((" Reboot Already in progress!\n"));
 	        }
         }
+    return NULL;
 }
 
-convert_to_validFW(char *fw,char *valid_fw)
+void convert_to_validFW(char *fw,char *valid_fw)
 {
 	/* Valid FW names
 		TG1682_DEV_stable2_20170717081507sdy
@@ -433,9 +441,9 @@ convert_to_validFW(char *fw,char *valid_fw)
 	char *buff = NULL;
 	int buff_len = 0;
 
-	if(buff = strstr(fw,"_signed"));
-	else if(buff = strstr(fw,"-signed"));
-	else if(buff = strstr(fw,"."));
+	if((buff = strstr(fw,"_signed")) != NULL){}
+	else if((buff = strstr(fw,"-signed")) != NULL){}
+	else if((buff = strstr(fw,".")) != NULL){}
 
 	if(buff)
 		buff_len = strlen(buff);

@@ -152,6 +152,7 @@ ANSC_STATUS ssp_Mbi_MessageBusEngage(char * component_id,char * config_file,char
 
 int ssp_Mbi_Initialize(void * user_data)
 {
+    UNREFERENCED_PARAMETER(user_data);
     ANSC_STATUS             returnStatus    = ANSC_STATUS_SUCCESS;
 
     return ( returnStatus == ANSC_STATUS_SUCCESS ) ? 0 : 1;
@@ -160,6 +161,7 @@ int ssp_Mbi_Initialize(void * user_data)
 
 int ssp_Mbi_Finalize(void* user_data)
 {
+    UNREFERENCED_PARAMETER(user_data);
     ANSC_STATUS             returnStatus    = ANSC_STATUS_SUCCESS;
 
     //TODO:Abdul
@@ -171,12 +173,14 @@ int ssp_Mbi_Finalize(void* user_data)
 
 int ssp_Mbi_Buscheck(void* user_data)
 {
+    UNREFERENCED_PARAMETER(user_data);
     return 0;
 }
 
 
 int ssp_Mbi_FreeResources(int priority,void  * user_data)
 {
+    UNREFERENCED_PARAMETER(user_data);
     ANSC_STATUS             returnStatus    = ANSC_STATUS_SUCCESS;
 
     if ( priority == CCSP_COMMON_COMPONENT_FREERESOURCES_PRIORITY_Low )
