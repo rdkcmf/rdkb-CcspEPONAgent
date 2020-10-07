@@ -75,6 +75,7 @@
 */
 #include "dslh_dmagnt_interface.h"
 #include "ccsp_ifo_ccd.h"
+#include "cosa_device_info_internal.h"
 
 /*
 #include "bbhm_diageo_interface.h"

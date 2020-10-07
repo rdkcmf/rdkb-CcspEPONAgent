@@ -27,7 +27,6 @@
 #define MAX_DPOE_DATA_ENTRY  32
 #define REMOVE_EXTRA_CRLF
 
-static ULONG i = 0;
 static dpoe_onu_packet_buffer_capabilities_t    Capabilities;
 static BOOL bOnu_packet_buffer_capabilities_fetched = FALSE;
 static dpoe_device_sys_descr_info_t             DeviceSysDescrInfo;
@@ -105,6 +104,7 @@ DPoE_GetParamUlongValue
         ULONG*                      puLong
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     BOOL status = TRUE;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
@@ -192,6 +192,8 @@ DPoE_SetParamUlongValue
         ULONG                       uValue
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
+    UNREFERENCED_PARAMETER(uValue);
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
 
     AnscTraceWarning(("<%s:%d> Unsupported parameter=%s\n", __FUNCTION__, __LINE__, ParamName));
@@ -210,6 +212,8 @@ DPoE_SetParamStringValue
         char*                       pString
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
+    UNREFERENCED_PARAMETER(pString);
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     AnscTraceWarning(("<%s:%d> Unsupported parameter=%s\n", __FUNCTION__, __LINE__, ParamName));
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
@@ -226,6 +230,7 @@ DPoE_GetParamStringValue
         ULONG*                      pUlSize
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     BOOL status = TRUE;
     dpoe_mac_address_t tDpoe_Mac;
     char macAddress[18] = {0};
@@ -272,6 +277,8 @@ DPoE_GetParamBoolValue
         BOOL*                       pBool
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
+    UNREFERENCED_PARAMETER(pBool);
     BOOL status = FALSE;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
@@ -301,6 +308,8 @@ DPoE_SetParamBoolValue
         BOOL                        bValue
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
+    UNREFERENCED_PARAMETER(bValue);
     BOOL status = TRUE;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
@@ -348,6 +357,8 @@ DPoE_GetParamIntValue
         INT*                        iValue
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
+    UNREFERENCED_PARAMETER(iValue);
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
@@ -362,6 +373,8 @@ DPoE_SetParamIntValue
         INT                         iValue
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
+    UNREFERENCED_PARAMETER(iValue);
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
@@ -396,6 +409,7 @@ DPoE_Commit
         ANSC_HANDLE                 hInsContext
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return 0;
@@ -409,6 +423,9 @@ DPoE_Validate
         ULONG*                      puLength
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
+    UNREFERENCED_PARAMETER(pReturnParamName);
+    UNREFERENCED_PARAMETER(puLength);
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return TRUE;
@@ -420,6 +437,7 @@ DPoE_Rollback
         ANSC_HANDLE                 hInsContext
     )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return 0;
@@ -433,6 +451,7 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     BOOL status = RETURN_OK;
     *pValue = (char)0;
     *pUlSize = 0L;
@@ -471,7 +490,7 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
         if ( status == RETURN_OK )
         {
             char buffer[64] = {0};
-            sprintf(buffer, "%X", FirmwareInfo.info_bootCrc32);
+            sprintf(buffer, "%X", (unsigned int)FirmwareInfo.info_bootCrc32);
             *pUlSize = strlen( buffer );
             strncpy( pValue, buffer, *pUlSize );
         }
@@ -481,7 +500,7 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
         if ( status == RETURN_OK )
         {
             char buffer[64] = {0};
-            sprintf(buffer, "%X", FirmwareInfo.info_appCrc32);
+            sprintf(buffer, "%X", (unsigned int)FirmwareInfo.info_appCrc32);
             *pUlSize = strlen( buffer );
             strncpy( pValue, buffer, *pUlSize );
         }
@@ -504,6 +523,7 @@ BOOL DPoE_ChipInfo_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     BOOL status = RETURN_OK;
     *pValue = (char)0;
     *pUlSize = 0L;
@@ -522,7 +542,7 @@ BOOL DPoE_ChipInfo_GetParamStringValue
         if ( status == RETURN_OK )
         {
             char buffer[64] = {0};
-            sprintf(buffer, "%X", EponChipInfo.info_ChipModel);
+            sprintf(buffer, "%X", (unsigned int)EponChipInfo.info_ChipModel);
             *pUlSize = strlen( buffer );
             strncpy( pValue, buffer, *pUlSize );
         }
@@ -532,7 +552,7 @@ BOOL DPoE_ChipInfo_GetParamStringValue
         if ( status == RETURN_OK )
         {
             char buffer[64] = {0};
-            sprintf(buffer, "%X", EponChipInfo.info_ChipVersion);
+            sprintf(buffer, "%X", (unsigned int)EponChipInfo.info_ChipVersion);
             *pUlSize = strlen( buffer );
             strncpy( pValue, buffer, *pUlSize );
         }
@@ -565,6 +585,7 @@ BOOL DPoE_ManufacturerInfo_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     BOOL status = RETURN_OK;
     *pValue = (char)0;
     *pUlSize = 0L;
@@ -583,7 +604,6 @@ BOOL DPoE_ManufacturerInfo_GetParamStringValue
 
 #if 1    // should be replaced with get_serialization_info
     {
-        int ret = RETURN_OK;
         FILE *fp;
         char *line = NULL;
         size_t len = 0;
@@ -715,6 +735,7 @@ BOOL DPoE_DeviceSysDescrInfo_GetParamStringValue
     ULONG*                      pUlSize
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     BOOL status = RETURN_OK;
     *pValue = (char)0;
     *pUlSize = 0L;
@@ -817,6 +838,7 @@ BOOL DPoE_OnuPacketBufferCapabilities_GetParamUlongValue
     ULONG*                      puLong
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     BOOL status = RETURN_OK;
     *puLong = 0L;
 
@@ -901,6 +923,7 @@ ULONG DPoE_LlidForwardingState_GetEntryCount
     ANSC_HANDLE                 hInsContext
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     int j;
     USHORT uEntryCount;
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
@@ -932,6 +955,7 @@ ANSC_HANDLE DPoE_LlidForwardingState_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
     USHORT uEntryCount;
 
@@ -1039,6 +1063,7 @@ ULONG DPoE_OamFrameRate_GetEntryCount
     ANSC_HANDLE                 hInsContext
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     int j;
     USHORT uEntryCount;
 
@@ -1071,6 +1096,7 @@ ANSC_HANDLE DPoE_OamFrameRate_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
     USHORT uEntryCount;
 
@@ -1164,6 +1190,7 @@ ULONG DPoE_DynamicMacTable_GetEntryCount
     ANSC_HANDLE                 hInsContext
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     int j;
     ULONG uEntryCount;
 
@@ -1199,6 +1226,7 @@ ANSC_HANDLE DPoE_DynamicMacTable_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
     ULONG uEntryCount;
 
@@ -1240,7 +1268,6 @@ BOOL DPoE_DynamicMacTable_GetParamStringValue
     *pValue = (char)0;
     *pUlSize = 0L;
     dpoe_mac_address_t tDpoe_Mac;
-    char macAddress[19] = {0};
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
@@ -1275,7 +1302,7 @@ BOOL DPoE_DynamicMacTable_GetParamStringValue
     else
     {
         AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
-        status = ANSC_STATUS_FAILURE;
+        status = (int)ANSC_STATUS_FAILURE;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n", __FUNCTION__)
     return status;
@@ -1317,6 +1344,7 @@ ULONG DPoE_StaticMacTable_GetEntryCount
     ANSC_HANDLE                 hInsContext
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     int j;
     ULONG uEntryCount;
 
@@ -1351,6 +1379,7 @@ ANSC_HANDLE DPoE_StaticMacTable_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
     ULONG uEntryCount;
 
@@ -1421,7 +1450,6 @@ BOOL DPoE_StaticMacTable_GetParamStringValue
     dpoe_link_mac_address_t    *pLinkStaticMacTable = (dpoe_link_mac_address_t *)hInsContext;
     BOOL status = ANSC_STATUS_SUCCESS;
     dpoe_mac_address_t    tDpoe_Mac;
-    char macAddress[18] = {0};
     *pValue = (char)0;
     *pUlSize = 0L;
 
@@ -1459,7 +1487,7 @@ BOOL DPoE_StaticMacTable_GetParamStringValue
     else
     {
         AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
-        status = ANSC_STATUS_FAILURE;
+        status = (int)ANSC_STATUS_FAILURE;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s>\n\n", __FUNCTION__)
     return status;
@@ -1470,6 +1498,7 @@ ULONG DPoE_OnuLinkStatistics_GetEntryCount
     ANSC_HANDLE                 hInsContext
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     int j;
     USHORT uEntryCount;
 
@@ -1501,6 +1530,7 @@ ANSC_HANDLE DPoE_OnuLinkStatistics_GetEntry
     ULONG*                      pInsNumber
 )
 {
+    UNREFERENCED_PARAMETER(hInsContext);
     ANSC_HANDLE *pHandle = (ANSC_HANDLE)NULL;
     USHORT uEntryCount;
 

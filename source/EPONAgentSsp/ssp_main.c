@@ -42,6 +42,7 @@
 #include "ssp_global.h"
 #include "stdlib.h"
 #include "ccsp_dm_api.h"
+#include <syscfg/syscfg.h>
 
 #ifdef INCLUDE_BREAKPAD
 #include "breakpad_wrapper.h"
@@ -54,14 +55,10 @@ char         g_Subsystem[32] = {0};
 
 int  cmd_dispatch(int  command)
 {
-    ULONG                           ulInsNumber        = 0;
-    parameterValStruct_t            val[3]             = {0};
     char*                           pParamNames[]      = {"Device.DPoE."};
     parameterValStruct_t**          ppReturnVal        = NULL;
-    parameterInfoStruct_t**         ppReturnValNames   = NULL;
-    parameterAttributeStruct_t**    ppReturnvalAttr    = NULL;
-    ULONG                           ulReturnValCount   = 0;
-    ULONG                           i                  = 0;
+    int                             ulReturnValCount   = 0;
+    int                             i                  = 0;
 
     EPONAGENTLOG(INFO, "Entering into %s\n", __FUNCTION__)
 
@@ -170,7 +167,6 @@ static void _print_stack_backtrace(void)
 
 #if defined(_ANSC_LINUX)
 static void daemonize(void) {
-    int fd;
     EPONAGENTLOG(INFO, "Entering into %s\n", __FUNCTION__)
 
     switch (fork()) {
@@ -196,6 +192,7 @@ static void daemonize(void) {
 
 #ifndef  _DEBUG
 
+    int fd;
     fd = open("/dev/null", O_RDONLY);
     if (fd != 0) {
         dup2(fd, 0);
@@ -247,6 +244,7 @@ void sig_handler(int sig)
 
 }
 
+#ifndef INCLUDE_BREAKPAD
 static int is_core_dump_opened(void)
 {
     FILE *fp;
@@ -278,12 +276,11 @@ static int is_core_dump_opened(void)
     fclose(fp);
     return 0;
 }
-
+#endif
 #endif
 
 int main(int argc, char* argv[])
 {
-    ANSC_STATUS returnStatus = ANSC_STATUS_SUCCESS;
     BOOL bRunAsDaemon = TRUE;
     int cmdChar = 0;
     int idx = 0;
@@ -398,8 +395,10 @@ int main(int argc, char* argv[])
     }
    // rdk_logger_init("/fss/gw/lib/debug.ini");
     syscfg_init();
-    system("touch /tmp/epon_agent_initialized");
-
+    if (system("touch /tmp/epon_agent_initialized") == -1 )
+    {
+        EPONAGENTLOG(ERROR,"Failed to create /tmp/epon_agent_initialized file.\n");
+    }
     if ( bRunAsDaemon )
     {
         while(1)

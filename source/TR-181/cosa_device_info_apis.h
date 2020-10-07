@@ -84,8 +84,8 @@ ANSC_STATUS CosaDmlDIGetProtocol(ANSC_HANDLE hContext, char *Protocol);
 ANSC_STATUS CosaDmlDIDownloadNow(ANSC_HANDLE hContext);
 ANSC_STATUS CosaDmlDISetURL(ANSC_HANDLE hContext, char *URL);
 ANSC_STATUS CosaDmlDISetImage(ANSC_HANDLE hContext, char *Image);
-void FWDL_ThreadFunc();
-convert_to_validFW(char *fw,char *valid_fw);
+void *FWDL_ThreadFunc(void *arg);
+void convert_to_validFW(char *fw,char *valid_fw);
 BOOL IsFileUpdateNeeded(ANSC_HANDLE hContext );
 void WriteFactoryResetParams(ANSC_HANDLE hContext );
 #endif
