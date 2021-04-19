@@ -111,7 +111,7 @@ DPoE_GetParamUlongValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "NumberOfNetworkPorts", TRUE) )
+    if (strcmp(ParamName, "NumberOfNetworkPorts") == 0)
     {
         if( dpoe_getNumberOfNetworkPorts(puLong) == FAILURE)
         {
@@ -121,7 +121,7 @@ DPoE_GetParamUlongValue
         else
             EPONAGENTLOG(INFO, "dpoe_getNumberOfNetworkPorts returned with SUCCESS\n")
     }
-    else if( AnscEqualString(ParamName, "NumberOfS1Interfaces", TRUE) )
+    else if (strcmp(ParamName, "NumberOfS1Interfaces") == 0)
     {
         if( dpoe_getNumberOfS1Interfaces(puLong) == FAILURE)
         {
@@ -131,7 +131,7 @@ DPoE_GetParamUlongValue
         else
             EPONAGENTLOG(INFO, "dpoe_getNumberOfS1Interfaces returned with SUCCESS\n")
     }
-    else if( AnscEqualString(ParamName, "DynamicMacAddressAgeLimit", TRUE) )
+    else if (strcmp(ParamName, "DynamicMacAddressAgeLimit") == 0)
     {
         USHORT value;
         if( dpoe_getDynamicMacAddressAgeLimit(&value) == FAILURE)
@@ -145,7 +145,7 @@ DPoE_GetParamUlongValue
             EPONAGENTLOG(INFO, "dpoe_getDynamicMacAddressAgeLimit returned with SUCCESS\n")
         }
     }
-    else if( AnscEqualString(ParamName, "DynamicMacLearningTableSize", TRUE) )
+    else if (strcmp(ParamName, "DynamicMacLearningTableSize") == 0)
     {
         USHORT value;
         if( dpoe_getDynamicMacLearningTableSize(&value) == FAILURE)
@@ -159,7 +159,7 @@ DPoE_GetParamUlongValue
             EPONAGENTLOG(INFO, "dpoe_getDynamicMacLearningTableSize returned with SUCCESS\n")
         }
     }
-    else if( AnscEqualString(ParamName, "MacLearningAggregateLimit", TRUE) )
+    else if (strcmp(ParamName, "MacLearningAggregateLimit") == 0)
     {
         USHORT value;
         if( dpoe_getMacLearningAggregateLimit(&value) == FAILURE)
@@ -239,7 +239,7 @@ DPoE_GetParamStringValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "Mac_address", TRUE) )
+    if (strcmp(ParamName, "Mac_address") == 0)
     {
         if( dpoe_getOnuId(&tDpoe_Mac) == FAILURE)
         {
@@ -287,11 +287,11 @@ DPoE_GetParamBoolValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "ResetOnu", TRUE) )
+    if (strcmp(ParamName, "ResetOnu") == 0)
     {
         status = TRUE;
     }
-    else if( AnscEqualString(ParamName, "ClearOnuLinkStatistics", TRUE) )
+    else if (strcmp(ParamName, "ClearOnuLinkStatistics") == 0)
     {
         status = TRUE;
     }
@@ -318,7 +318,7 @@ DPoE_SetParamBoolValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "ResetOnu", TRUE) )
+    if (strcmp(ParamName, "ResetOnu") == 0)
     {
         if ( dpoe_setResetOnu() == FAILURE)
         {
@@ -328,7 +328,7 @@ DPoE_SetParamBoolValue
         else
             EPONAGENTLOG(INFO, "dpoe_setResetOnu returned with SUCCESS\n")
     }
-    else if( AnscEqualString(ParamName, "ClearOnuLinkStatistics", TRUE) )
+    else if (strcmp(ParamName, "ClearOnuLinkStatistics") == 0)
     {
         if ( dpoe_setClearOnuLinkStatistics() == FAILURE)
         {
@@ -467,7 +467,7 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "bootVersion", TRUE) )
+    if (strcmp(ParamName, "bootVersion") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -477,7 +477,7 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
             strncpy( pValue, buffer, *pUlSize );
         }
     }
-    else if( AnscEqualString(ParamName, "appVersion", TRUE) )
+    else if (strcmp(ParamName, "appVersion") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -487,7 +487,7 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
             strncpy( pValue, buffer, *pUlSize );
         }
     }
-    else if( AnscEqualString(ParamName, "bootCrc32", TRUE) )
+    else if (strcmp(ParamName, "bootCrc32") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -497,7 +497,7 @@ BOOL DPoE_FirmwareInfo_GetParamStringValue
             strncpy( pValue, buffer, *pUlSize );
         }
     }
-    else if( AnscEqualString(ParamName, "appCrc32", TRUE) )
+    else if (strcmp(ParamName, "appCrc32") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -539,7 +539,7 @@ BOOL DPoE_ChipInfo_GetParamStringValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "chipModel", TRUE) )
+    if (strcmp(ParamName, "chipModel") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -549,7 +549,7 @@ BOOL DPoE_ChipInfo_GetParamStringValue
             strncpy( pValue, buffer, *pUlSize );
         }
     }
-    else if( AnscEqualString(ParamName, "chipVersion", TRUE) )
+    else if (strcmp(ParamName, "chipVersion") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -559,7 +559,7 @@ BOOL DPoE_ChipInfo_GetParamStringValue
             strncpy( pValue, buffer, *pUlSize );
         }
     }    
-    else if( AnscEqualString(ParamName, "jedecId", TRUE) )
+    else if (strcmp(ParamName, "jedecId") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -662,7 +662,7 @@ BOOL DPoE_ManufacturerInfo_GetParamStringValue
 #endif
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "info", TRUE) )
+    if (strcmp(ParamName, "info") == 0)
     {
         char buffer[256] = {0};
         int iLen = 0;
@@ -682,7 +682,7 @@ BOOL DPoE_ManufacturerInfo_GetParamStringValue
             strncpy( pValue, buffer, *pUlSize );
         }
     }
-    else if( AnscEqualString(ParamName, "organizationName", TRUE) )
+    else if (strcmp(ParamName, "organizationName") == 0)
     {
         status = dpoe_getDeviceSysDescrInfo(&DeviceSysDescrInfo);
         if ( status == RETURN_OK )
@@ -707,7 +707,7 @@ BOOL DPoE_ManufacturerInfo_GetParamStringValue
             strncpy( pValue, (char *)&DeviceSysDescrInfo.info_VendorName, *pUlSize );
         }
     }
-    else if( AnscEqualString(ParamName, "manufacturerDate", TRUE) )
+    else if (strcmp(ParamName, "manufacturerDate") == 0)
     {
         char buffer[256] = {0};
 
@@ -751,7 +751,7 @@ BOOL DPoE_DeviceSysDescrInfo_GetParamStringValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     //check the parameter name and return the corresponding value
-    if( AnscEqualString(ParamName, "vendorName", TRUE) )
+    if (strcmp(ParamName, "vendorName") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -775,7 +775,7 @@ BOOL DPoE_DeviceSysDescrInfo_GetParamStringValue
             strncpy( pValue, (char *)&DeviceSysDescrInfo.info_VendorName, *pUlSize );
         }
     }
-    else if( AnscEqualString(ParamName, "modelNumber", TRUE) )
+    else if (strcmp(ParamName, "modelNumber") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -799,7 +799,7 @@ BOOL DPoE_DeviceSysDescrInfo_GetParamStringValue
             strncpy( pValue, (char *)&DeviceSysDescrInfo.info_ModelNumber, *pUlSize );
         }
     }
-    else if( AnscEqualString(ParamName, "hardwareVersion", TRUE) )
+    else if (strcmp(ParamName, "hardwareVersion") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -854,56 +854,56 @@ BOOL DPoE_OnuPacketBufferCapabilities_GetParamUlongValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "upstreamQueues", TRUE) )
+    if (strcmp(ParamName, "upstreamQueues") == 0)
     {
         if ( status == RETURN_OK )
         {
             *puLong = Capabilities.capabilities_UpstreamQueues;
         }
     }
-    else if( AnscEqualString(ParamName, "upQueuesMaxPerLink", TRUE) )
+    else if (strcmp(ParamName, "upQueuesMaxPerLink") == 0)
     {
         if ( status == RETURN_OK )
         {
             *puLong = Capabilities.capabilities_UpQueuesMaxPerLink;
         }
     }
-    else if( AnscEqualString(ParamName, "upQueueIncrement", TRUE) )
+    else if (strcmp(ParamName, "upQueueIncrement") == 0)
     {
         if ( status == RETURN_OK )
         {
             *puLong = Capabilities.capabilities_UpQueueIncrement;
         }
     }
-    else if( AnscEqualString(ParamName, "downstreamQueues", TRUE) )
+    else if (strcmp(ParamName, "downstreamQueues") == 0)
     {
         if ( status == RETURN_OK )
         {
             *puLong = Capabilities.capabilities_DownstreamQueues;
         }
     }
-    else if( AnscEqualString(ParamName, "dnQueuesMaxPerPort", TRUE) )
+    else if (strcmp(ParamName, "dnQueuesMaxPerPort") == 0)
     {
         if ( status == RETURN_OK )
         {
             *puLong = Capabilities.capabilities_DnQueuesMaxPerPort;
         }
     }
-    else if( AnscEqualString(ParamName, "dnQueueIncrement", TRUE) )
+    else if (strcmp(ParamName, "dnQueueIncrement") == 0)
     {
         if ( status == RETURN_OK )
         {
             *puLong = Capabilities.capabilities_DnQueueIncrement;
         }
     }
-    else if( AnscEqualString(ParamName, "totalPacketBuffer", TRUE) )
+    else if (strcmp(ParamName, "totalPacketBuffer") == 0)
     {
         if ( status == RETURN_OK )
         {
             *puLong = Capabilities.capabilities_TotalPacketBuffer;
         }
     }
-    else if( AnscEqualString(ParamName, "dnPacketBuffer", TRUE) )
+    else if (strcmp(ParamName, "dnPacketBuffer") == 0)
     {
         if ( status == RETURN_OK )
         {
@@ -1011,7 +1011,7 @@ BOOL DPoE_LlidForwardingState_GetParamBoolValue
     EPONAGENTLOG(INFO, "    ParamName is: %s pLink_forwarding_state = %p\n", ParamName, pLink_forwarding_state)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "forwardingState", TRUE) )
+    if (strcmp(ParamName, "forwardingState") == 0)
     {
         if ( pLink_forwarding_state )
         {
@@ -1043,7 +1043,7 @@ BOOL DPoE_LlidForwardingState_GetParamUlongValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "link", TRUE) )
+    if (strcmp(ParamName, "link") == 0)
     {
         if ( pLink_forwarding_state )
         {
@@ -1154,7 +1154,7 @@ BOOL DPoE_OamFrameRate_GetParamUlongValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "link", TRUE) )
+    if (strcmp(ParamName, "link") == 0)
     {
         if ( pLinkOamFrameRate )
         {
@@ -1162,7 +1162,7 @@ BOOL DPoE_OamFrameRate_GetParamUlongValue
             *puLong = pLinkOamFrameRate->link_Id;
         }
     }
-    else if( AnscEqualString(ParamName, "maxRate", TRUE) )
+    else if (strcmp(ParamName, "maxRate") == 0)
     {
         if ( pLinkOamFrameRate )
         {
@@ -1170,7 +1170,7 @@ BOOL DPoE_OamFrameRate_GetParamUlongValue
             *puLong = pLinkOamFrameRate->link_MaxRate;
         }
     }
-    else if( AnscEqualString(ParamName, "minRate", TRUE) )
+    else if (strcmp(ParamName, "minRate") == 0)
     {
         if ( pLinkOamFrameRate )
         {
@@ -1275,7 +1275,7 @@ BOOL DPoE_DynamicMacTable_GetParamStringValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "macAddress", TRUE) )
+    if (strcmp(ParamName, "macAddress") == 0)
     {
         if ( pLinkDynamicMacTable )
         {
@@ -1325,7 +1325,7 @@ BOOL DPoE_DynamicMacTable_GetParamUlongValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "link", TRUE) )
+    if (strcmp(ParamName, "link") == 0)
     {
         if ( pLinkDynamicMacTable )
         {
@@ -1425,7 +1425,7 @@ BOOL DPoE_StaticMacTable_GetParamUlongValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "link", TRUE) )
+    if (strcmp(ParamName, "link") == 0)
     {
         if ( pLinkStaticMacTable )
         {
@@ -1459,7 +1459,7 @@ BOOL DPoE_StaticMacTable_GetParamStringValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "macAddress", TRUE) )
+    if (strcmp(ParamName, "macAddress") == 0)
     {
         if ( pLinkStaticMacTable )
         {
@@ -1577,96 +1577,96 @@ BOOL DPoE_OnuLinkStatistics_GetParamUlongValue
     EPONAGENTLOG(INFO, "    ParamName is: %s\n", ParamName)
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "rxUnicastFrames", TRUE) )
+    if (strcmp(ParamName, "rxUnicastFrames") == 0)
     {
         dpoe_getOnuLinkStatistics(pOnuLinkTrafficStats, 1);
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxUnicastFrames;
     }
-    else if( AnscEqualString(ParamName, "txUnicastFrames", TRUE) )
+    else if (strcmp(ParamName, "txUnicastFrames") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxUnicastFrames;
     }
-    else if( AnscEqualString(ParamName, "rxFrameTooShort", TRUE) )
+    else if (strcmp(ParamName, "rxFrameTooShort") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrameTooShort;
     }
-    else if( AnscEqualString(ParamName, "rxFrame64", TRUE) )
+    else if (strcmp(ParamName, "rxFrame64") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame64;
     }
-    else if( AnscEqualString(ParamName, "rxFrame65_127", TRUE) )
+    else if (strcmp(ParamName, "rxFrame65_127") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame65_127;
     }
-    else if( AnscEqualString(ParamName, "rxFrame128_255", TRUE) )
+    else if (strcmp(ParamName, "rxFrame128_255") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame128_255;
     }
-    else if( AnscEqualString(ParamName, "rxFrame256_511", TRUE) )
+    else if (strcmp(ParamName, "rxFrame256_511") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame256_511;
     }
-    else if( AnscEqualString(ParamName, "rxFrame512_1023", TRUE) )
+    else if (strcmp(ParamName, "rxFrame512_1023") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame512_1023;
     }
-    else if( AnscEqualString(ParamName, "rxFrame1024_1518", TRUE) )
+    else if (strcmp(ParamName, "rxFrame1024_1518") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame1024_1518;
     }
-    else if( AnscEqualString(ParamName, "rxFrame1519_Plus", TRUE) )
+    else if (strcmp(ParamName, "rxFrame1519_Plus") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_RxFrame1519_Plus;
     }
-    else if( AnscEqualString(ParamName, "txFrame64", TRUE) )
+    else if (strcmp(ParamName, "txFrame64") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame64;
     }
-    else if( AnscEqualString(ParamName, "txFrame65_127", TRUE) )
+    else if (strcmp(ParamName, "txFrame65_127") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame65_127;
     }
-    else if( AnscEqualString(ParamName, "txFrame128_255", TRUE) )
+    else if (strcmp(ParamName, "txFrame128_255") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame128_255;
     }
-    else if( AnscEqualString(ParamName, "txFrame256_511", TRUE) )
+    else if (strcmp(ParamName, "txFrame256_511") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame256_511;
     }
-    else if( AnscEqualString(ParamName, "txFrame512_1023", TRUE) )
+    else if (strcmp(ParamName, "txFrame512_1023") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame512_1023;
     }
-    else if( AnscEqualString(ParamName, "txFrame_1024_1518", TRUE) )
+    else if (strcmp(ParamName, "txFrame_1024_1518") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame_1024_1518;
     }
-    else if( AnscEqualString(ParamName, "txFrame_1519_Plus", TRUE) )
+    else if (strcmp(ParamName, "txFrame_1519_Plus") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_TxFrame_1519_Plus;
     }
-    else if( AnscEqualString(ParamName, "framesDropped", TRUE) )
+    else if (strcmp(ParamName, "framesDropped") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_FramesDropped;
     }
-    else if( AnscEqualString(ParamName, "bytesDropped", TRUE) )
+    else if (strcmp(ParamName, "bytesDropped") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_BytesDropped;
     }
-    else if( AnscEqualString(ParamName, "opticalMonVcc", TRUE) )
+    else if (strcmp(ParamName, "opticalMonVcc") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_OpticalMonVcc;
     }
-    else if( AnscEqualString(ParamName, "opticalMonTxBiasCurrent", TRUE) )
+    else if (strcmp(ParamName, "opticalMonTxBiasCurrent") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_OpticalMonTxBiasCurrent;
     }
-    else if( AnscEqualString(ParamName, "opticalMonTxPower", TRUE) )
+    else if (strcmp(ParamName, "opticalMonTxPower") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_OpticalMonTxPower;
     }
-    else if( AnscEqualString(ParamName, "opticalMonRxPower", TRUE) )
+    else if (strcmp(ParamName, "opticalMonRxPower") == 0)
     {
         uLongLong = pOnuLinkTrafficStats->link_TrafficStats.port_OpticalMonRxPower;
     }

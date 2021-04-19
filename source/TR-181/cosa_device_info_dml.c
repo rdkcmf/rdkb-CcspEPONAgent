@@ -126,7 +126,7 @@ DeviceInfo_GetParamBoolValue
     PCOSA_DATAMODEL_DEVICEINFO     pMyObject = (PCOSA_DATAMODEL_DEVICEINFO)g_pCosaBEManager->hDI;
 
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadNow", TRUE) )
+    if (strcmp(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadNow") == 0)
     {
 	 if(pMyObject->Download_Control_Flag)
 	 {
@@ -192,7 +192,7 @@ DeviceInfo_GetParamStringValue
     char Protocol[16]={0};
     
     /* check the parameter name and return the corresponding value */
-    if( AnscEqualString(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadStatus", TRUE) )
+    if (strcmp(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadStatus") == 0)
     {
     	 if(pMyObject->Download_Control_Flag)
     	 {
@@ -209,7 +209,7 @@ DeviceInfo_GetParamStringValue
         return 0;
     }
 
-    if( AnscEqualString(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadProtocol", TRUE) )
+    if (strcmp(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadProtocol") == 0)
     {
     	 if(pMyObject->Download_Control_Flag)
     	 {
@@ -226,7 +226,7 @@ DeviceInfo_GetParamStringValue
         return 0;
     }
 
-    if( AnscEqualString(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadURL", TRUE) )
+    if (strcmp(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadURL") == 0)
     {
     	 if(pMyObject->Download_Control_Flag)
     	 {
@@ -245,7 +245,7 @@ DeviceInfo_GetParamStringValue
         return 0;
     }
 
-    if( AnscEqualString(ParamName, "X_RDKCENTRAL-COM_FirmwareToDownload", TRUE) )
+    if (strcmp(ParamName, "X_RDKCENTRAL-COM_FirmwareToDownload") == 0)
     {
     	 if(pMyObject->Download_Control_Flag)
     	 {
@@ -309,7 +309,7 @@ DeviceInfo_SetParamBoolValue
     PCOSA_DATAMODEL_DEVICEINFO      pMyObject = (PCOSA_DATAMODEL_DEVICEINFO)g_pCosaBEManager->hDI;
 
     /* check the parameter name and set the corresponding value */
-    if( AnscEqualString(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadNow", TRUE))
+    if (strcmp(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadNow") == 0)
     {
     	 if(pMyObject->Download_Control_Flag)
     	 {
@@ -371,7 +371,7 @@ DeviceInfo_SetParamStringValue
     PCOSA_DATAMODEL_DEVICEINFO      pMyObject = (PCOSA_DATAMODEL_DEVICEINFO)g_pCosaBEManager->hDI;
 
     /* check the parameter name and set the corresponding value */
-    if( AnscEqualString(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadURL", TRUE))
+    if (strcmp(ParamName, "X_RDKCENTRAL-COM_FirmwareDownloadURL") == 0)
     {
     	 if(pMyObject->Download_Control_Flag)
     	 {
@@ -384,7 +384,7 @@ DeviceInfo_SetParamStringValue
         return TRUE;
     }
 
-    if( AnscEqualString(ParamName, "X_RDKCENTRAL-COM_FirmwareToDownload", TRUE))
+    if (strcmp(ParamName, "X_RDKCENTRAL-COM_FirmwareToDownload") == 0)
     {
     	 if(pMyObject->Download_Control_Flag)
     	 {
