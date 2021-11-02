@@ -78,7 +78,7 @@ COSA_Init
 
     if ( uMaxVersionSupported < THIS_PLUGIN_VERSION )
     {
-        EPONAGENTLOG(INFO, "%u version not supported\n", uMaxVersionSupported)
+        EPONAGENTLOG(INFO, "%lu version not supported\n", uMaxVersionSupported)
       /* this version is not supported */
         return -1;
     }

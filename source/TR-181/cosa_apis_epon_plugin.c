@@ -255,7 +255,9 @@ DPoE_GetParamStringValue
             strcpy( pValue, macAddress);
             *pUlSize = strlen(pValue);
 
-            EPONAGENTLOG(INFO, "tDpoe_Mac.macAddress=%u macAddress=%s pValue=%s *pUlSize=%d \n", tDpoe_Mac.macAddress, macAddress, pValue, *pUlSize)
+            EPONAGENTLOG(INFO, "tDpoe_Mac.macAddress=%02x:%02x:%02x:%02x:%02x:%02x macAddress=%s pValue=%s *pUlSize=%lu \n",
+                tDpoe_Mac.macAddress[0], tDpoe_Mac.macAddress[1], tDpoe_Mac.macAddress[2], tDpoe_Mac.macAddress[3],
+                tDpoe_Mac.macAddress[4], tDpoe_Mac.macAddress[5], macAddress, pValue, *pUlSize)
         }
     }
     else
@@ -960,7 +962,7 @@ ANSC_HANDLE DPoE_LlidForwardingState_GetEntry
     USHORT uEntryCount;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    EPONAGENTLOG(INFO, "    ParamName is: LlidForwardingState_GetEntry %d\n", nIndex);
+    EPONAGENTLOG(INFO, "    ParamName is: LlidForwardingState_GetEntry %lu\n", nIndex);
     
     *pInsNumber = nIndex + 1;
     if ( dpoe_LlidForwardingStateGetEntryCount( &uEntryCount ) != RETURN_OK )
@@ -987,7 +989,7 @@ ANSC_HANDLE DPoE_LlidForwardingState_GetEntry
      */
     else if (nIndex >= MAX_DPOE_DATA_ENTRY)
     {
-        EPONAGENTLOG(INFO, "  nIndex %d exceeds array range, reduce to %d.", nIndex, nIndex-1)
+        EPONAGENTLOG(INFO, "  nIndex %lu exceeds array range, reduce to %lu.", nIndex, nIndex-1)
         nIndex = MAX_DPOE_DATA_ENTRY - 1;
     }
     EPONAGENTLOG(INFO, "Exiting from <%s> pHandle = %p link_ForwardingState = %d\n\n", __FUNCTION__, pHandle, linkForwardingState[nIndex].link_ForwardingState)
@@ -1101,7 +1103,7 @@ ANSC_HANDLE DPoE_OamFrameRate_GetEntry
     USHORT uEntryCount;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    EPONAGENTLOG(INFO, "    ParamName is: DPoE_OamFrameRate_GetEntry %d\n", nIndex)
+    EPONAGENTLOG(INFO, "    ParamName is: DPoE_OamFrameRate_GetEntry %lu\n", nIndex)
 
     *pInsNumber = nIndex + 1;
 
@@ -1130,10 +1132,10 @@ ANSC_HANDLE DPoE_OamFrameRate_GetEntry
      */
     else if (nIndex >= MAX_DPOE_DATA_ENTRY)
     {
-        EPONAGENTLOG(INFO, "  nIndex %d exceeds array range, reduce to %d.", nIndex, nIndex-1)
+        EPONAGENTLOG(INFO, "  nIndex %lu exceeds array range, reduce to %lu.", nIndex, nIndex-1)
         nIndex = MAX_DPOE_DATA_ENTRY - 1;
     }
-    EPONAGENTLOG(INFO, "Exiting from <%s> nIndex = %d uEntryCount = %d pHandle = %p link_ForwardingState = %d\n\n", __FUNCTION__, nIndex, uEntryCount, pHandle, linkForwardingState[nIndex].link_ForwardingState)
+    EPONAGENTLOG(INFO, "Exiting from <%s> nIndex = %lu uEntryCount = %d pHandle = %p link_ForwardingState = %d\n\n", __FUNCTION__, nIndex, uEntryCount, pHandle, linkForwardingState[nIndex].link_ForwardingState)
     return pHandle;
 }
 
@@ -1181,7 +1183,7 @@ BOOL DPoE_OamFrameRate_GetParamUlongValue
         AnscTraceWarning(("<%s:%d> Unsupported parameter %s\n", __FUNCTION__, __LINE__, ParamName));
         status = FALSE;
     }
-    EPONAGENTLOG(INFO, "Exiting from <%s> puLong = %d return = %d\n\n", __FUNCTION__, *puLong, ( (status == RETURN_OK) ? TRUE : FALSE ) )
+    EPONAGENTLOG(INFO, "Exiting from <%s> puLong = %lu return = %d\n\n", __FUNCTION__, *puLong, ( (status == RETURN_OK) ? TRUE : FALSE ) )
     return ( (status == RETURN_OK) ? TRUE : FALSE );
 }
 
@@ -1231,7 +1233,7 @@ ANSC_HANDLE DPoE_DynamicMacTable_GetEntry
     ULONG uEntryCount;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    EPONAGENTLOG(INFO, "    ParamName is: DynamicMacTable_GetEntry %d\n", nIndex)
+    EPONAGENTLOG(INFO, "    ParamName is: DynamicMacTable_GetEntry %lu\n", nIndex)
 
     *pInsNumber = nIndex + 1;
 
@@ -1384,7 +1386,7 @@ ANSC_HANDLE DPoE_StaticMacTable_GetEntry
     ULONG uEntryCount;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    EPONAGENTLOG(INFO, "    ParamName is: StaticMacTable_GetEntry %d\n", nIndex)
+    EPONAGENTLOG(INFO, "    ParamName is: StaticMacTable_GetEntry %lu\n", nIndex)
 
     *pInsNumber = nIndex + 1;
 
@@ -1535,7 +1537,7 @@ ANSC_HANDLE DPoE_OnuLinkStatistics_GetEntry
     USHORT uEntryCount;
 
     EPONAGENTLOG(INFO, "Entering into <%s>\n", __FUNCTION__)
-    EPONAGENTLOG(INFO, "    ParamName is: OnuLinkStatistics_GetEntry %d\n", nIndex)
+    EPONAGENTLOG(INFO, "    ParamName is: OnuLinkStatistics_GetEntry %lu\n", nIndex)
 
     if ( dpoe_OnuLinkStatisticsGetEntryCount( &uEntryCount ) != RETURN_OK )
     {
