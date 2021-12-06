@@ -73,6 +73,8 @@
 #include "cosa_device_info_apis.h"
 #include "cm_hal.h"
 #include "cosa_device_info_internal.h"
+#include <syscfg/syscfg.h>
+#define MAX_PROTOCOL  16
 
 ANSC_STATUS
 CosaDmlDIInit
@@ -88,7 +90,8 @@ CosaDmlDIInit
     
     if(pMyObject->Download_Control_Flag)
     	CosaDmlDIGetFWVersion((ANSC_HANDLE)pMyObject);
-    
+    CosaDmlDIGetURL((ANSC_HANDLE)pMyObject);
+    CosaDmlDIGetImage((ANSC_HANDLE)pMyObject); 
     return ANSC_STATUS_SUCCESS;
 }
 ANSC_STATUS CosaDmlDIGetDLFlag(ANSC_HANDLE hContext)
@@ -181,22 +184,103 @@ ANSC_STATUS CosaDmlDIGetDLStatus(ANSC_HANDLE hContext, char *DL_Status)
 	return ANSC_STATUS_SUCCESS;
 }
 
-ANSC_STATUS CosaDmlDIGetProtocol(ANSC_HANDLE hContext, char *Protocol)
+int CosaDmlDISetProtocol(PCOSA_DATAMODEL_DEVICEINFO pMyObject)
 {
-	PCOSA_DATAMODEL_DEVICEINFO     pMyObject = (PCOSA_DATAMODEL_DEVICEINFO)hContext;
+    if(AnscEqualString2(pMyObject->DownloadURL,"https", 5, FALSE))
+    {
+        if(syscfg_set(NULL,"fw_dl_protocol","HTTPS")!=0)
+        {
+            CcspTraceWarning(("%s: syscfg_set failed \n", __FUNCTION__));
+            return -1;
+        }
+    }
+    else if(AnscEqualString2(pMyObject->DownloadURL,"http", 4, FALSE))
+    {
+        if(syscfg_set(NULL,"fw_dl_protocol","HTTP")!=0)
+        {
+            CcspTraceWarning(("%s: syscfg_set failed \n", __FUNCTION__));
+            return -1;
+        }
+    }
+    else if(AnscEqualString2(pMyObject->DownloadURL,"", 1, FALSE))
+    {
+        if(syscfg_set(NULL,"fw_dl_protocol","")!=0)
+        {
+            CcspTraceWarning(("%s: syscfg_set failed \n", __FUNCTION__));
+            return -1;
+        }
+    }
+    else
+    {
+        if(syscfg_set(NULL,"fw_dl_protocol","INVALID")!=0)
+        {
+            CcspTraceWarning(("%s: syscfg_set failed \n", __FUNCTION__));
+            return -1;
+        }
+    }
+    if (syscfg_commit() != 0)
+    {
+        CcspTraceWarning(("%s: syscfg commit failed \n", __FUNCTION__));
+    }
+    return 0;
+}
+ANSC_STATUS CosaDmlDIGetProtocol(char *Protocol)
+{
+    int rc = -1;
+    char buf[64]={0};
+    if(syscfg_get( NULL, "fw_dl_protocol", buf, sizeof(buf)) == 0)
+    {
+        rc = snprintf(Protocol,MAX_PROTOCOL,buf);
+    }
+    if(rc < 0)
+    {
+        return ANSC_STATUS_FAILURE;
+    }
+    CcspTraceInfo((" Download Protocol is %s \n", Protocol));
+    return ANSC_STATUS_SUCCESS;
+}
 
-	if(strlen(pMyObject->DownloadURL) == 0)
-		AnscCopyString(Protocol, "");
-	else if(AnscEqualString2(pMyObject->DownloadURL,"https", 5, FALSE))
-		AnscCopyString(Protocol, "HTTPS");
-	else if(AnscEqualString2(pMyObject->DownloadURL,"http", 4, FALSE))
-		AnscCopyString(Protocol, "HTTP");
-	else
-		AnscCopyString(Protocol, "INVALID");
+ANSC_STATUS CosaDmlDIGetURL(ANSC_HANDLE hContext)
+{
+    PCOSA_DATAMODEL_DEVICEINFO     pMyObject = (PCOSA_DATAMODEL_DEVICEINFO)hContext;
+    if(syscfg_get(NULL,"xconf_url",pMyObject->DownloadURL,128) == 0)
+    {
+        return ANSC_STATUS_SUCCESS;
+    }
+    return ANSC_STATUS_FAILURE;
+}
 
-	CcspTraceInfo((" Download Protocol is %s \n", Protocol));
-	
-	return ANSC_STATUS_SUCCESS;	
+ANSC_STATUS CosaDmlDIGetImage(ANSC_HANDLE hContext)
+{
+    PCOSA_DATAMODEL_DEVICEINFO     pMyObject = (PCOSA_DATAMODEL_DEVICEINFO)hContext;
+    char Last_reboot_reason[14]={0};
+    int rc = -1;
+    //On Factory reset Syscfg values will be empty. So sync fw_to_upgrade with current image version
+    if(syscfg_get(NULL,"X_RDKCENTRAL-COM_LastRebootReason",Last_reboot_reason,14) == 0)
+    {
+        if( AnscEqualString(Last_reboot_reason, "factory-reset", TRUE))
+        {
+            rc = snprintf(pMyObject->Firmware_To_Download,128,pMyObject->Current_Firmware);
+            if(rc < 0)
+            {
+                return ANSC_STATUS_FAILURE;
+            }
+            if(syscfg_set(NULL, "fw_to_upgrade", pMyObject->Firmware_To_Download) == 0)
+            {
+                if(syscfg_commit() != 0)
+                    CcspTraceWarning(("%s: syscfg commit failed \n", __FUNCTION__));
+            }
+            return ANSC_STATUS_SUCCESS;
+        }
+        else
+        {
+            if(syscfg_get(NULL,"fw_to_upgrade",pMyObject->Firmware_To_Download,128) == 0)
+            {
+                return ANSC_STATUS_SUCCESS;
+            }
+        }
+    }
+    return ANSC_STATUS_FAILURE;
 }
 
 ANSC_STATUS CosaDmlDIDownloadNow(ANSC_HANDLE hContext)
@@ -299,7 +383,8 @@ void WriteFactoryResetParams( ANSC_HANDLE hContext )
 {
 	CcspTraceInfo((" In %s \n", __FUNCTION__));
 	PCOSA_DATAMODEL_DEVICEINFO     pMyObject = (PCOSA_DATAMODEL_DEVICEINFO)hContext;
-	FILE *fp;
+    int syscfg_fail=0;
+/*    FILE *fp;
 	if((fp = fopen("/tmp/FactoryReset.txt", "w")) == NULL)
 	{
 		CcspTraceError(( "FactoryReset.txt file open failed.\n"));
@@ -307,8 +392,22 @@ void WriteFactoryResetParams( ANSC_HANDLE hContext )
 	}
 	fprintf(fp, "Url=%s\n", pMyObject->DownloadURL);
 	fprintf(fp, "Image=%s\n", pMyObject->Firmware_To_Download);
-	fclose(fp);
-
+	fclose(fp); */ //Replaced this code for RDKB-35095
+    if (syscfg_set(NULL, "xconf_url", pMyObject->DownloadURL) != 0)
+    {
+        CcspTraceWarning(("%s: syscfg_set failed for xconf_url\n", __FUNCTION__));
+        syscfg_fail++;
+    }
+    if(syscfg_set(NULL, "fw_to_upgrade", pMyObject->Firmware_To_Download) != 0)
+    {
+        CcspTraceWarning(("%s: syscfg_set failed for fw_to_upgrade\n", __FUNCTION__));
+        syscfg_fail++;
+    }
+    if (syscfg_fail <= 1)
+    {
+        if(syscfg_commit() != 0)
+            CcspTraceWarning(("%s: syscfg commit failed \n", __FUNCTION__));
+    }
 }
 
 ANSC_STATUS CosaDmlDISetURL(ANSC_HANDLE hContext, char *URL)
@@ -318,10 +417,11 @@ ANSC_STATUS CosaDmlDISetURL(ANSC_HANDLE hContext, char *URL)
 
 	AnscCopyString(pMyObject->DownloadURL, URL);
 	CcspTraceInfo((" URL is %s \n", pMyObject->DownloadURL));
-	if( IsFileUpdateNeeded( (ANSC_HANDLE)pMyObject))
-	{
-		WriteFactoryResetParams( (ANSC_HANDLE)pMyObject);
-	}
+    if(CosaDmlDISetProtocol(pMyObject) == -1 )
+    {
+        CcspTraceInfo((" Image upgrade protocol set failed in %s\n",__FUNCTION__));
+    }
+	WriteFactoryResetParams( (ANSC_HANDLE)pMyObject);
 	return ANSC_STATUS_SUCCESS;
 }
 
@@ -331,10 +431,7 @@ ANSC_STATUS CosaDmlDISetImage(ANSC_HANDLE hContext, char *Image)
 
 	AnscCopyString(pMyObject->Firmware_To_Download, Image);
 	CcspTraceInfo((" FW DL is %s \n", pMyObject->Firmware_To_Download));
-	if( IsFileUpdateNeeded( (ANSC_HANDLE)pMyObject))
-	{
-		WriteFactoryResetParams((ANSC_HANDLE)pMyObject);
-	}
+	WriteFactoryResetParams((ANSC_HANDLE)pMyObject);
 	return ANSC_STATUS_SUCCESS;	
 }
 
