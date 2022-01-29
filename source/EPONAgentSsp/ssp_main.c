@@ -66,7 +66,6 @@ int  cmd_dispatch(int  command)
     {
         case    'e' :
 
-#ifdef _ANSC_LINUX
             EPONAGENTLOG(INFO, "Connect to bus daemon...\n")
 
             {
@@ -88,7 +87,6 @@ int  cmd_dispatch(int  command)
                         gpEponStartCfg->DbusPath
                     );
             }
-#endif
 
             ssp_create(gpEponStartCfg);
             ssp_engage(gpEponStartCfg);
@@ -165,7 +163,6 @@ static void _print_stack_backtrace(void)
 #endif
 }
 
-#if defined(_ANSC_LINUX)
 static void daemonize(void) {
     EPONAGENTLOG(INFO, "Entering into %s\n", __FUNCTION__)
 
@@ -277,7 +274,6 @@ static int is_core_dump_opened(void)
     return 0;
 }
 #endif
-#endif
 
 int main(int argc, char* argv[])
 {
@@ -326,19 +322,6 @@ int main(int argc, char* argv[])
         }
     }
 
-#if  defined(_ANSC_WINDOWSNT)
-
-    AnscStartupSocketWrapper(NULL);
-
-    cmd_dispatch('e');
-
-    while ( cmdChar != 'q' )
-    {
-        cmdChar = getchar();
-
-        cmd_dispatch(cmdChar);
-    }
-#elif defined(_ANSC_LINUX)
     if ( bRunAsDaemon )
         daemonize();
 
@@ -416,7 +399,6 @@ int main(int argc, char* argv[])
         }
     }
 
-#endif
     err = Cdm_Term();
     if (err != CCSP_SUCCESS)
     {
