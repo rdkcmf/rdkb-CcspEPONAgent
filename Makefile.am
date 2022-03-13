@@ -20,13 +20,13 @@ SUBDIRS = source
 
 ACLOCAL_AMFLAGS = -I m4
 
-lib_LTLIBRARIES=libepon_tr181.la
+lib_LTLIBRARIES = libepon_tr181.la
 
-libepon_tr181_la_CPPFLAGS= -D_ANSC_LINUX -D_ANSC_USER
+libepon_tr181_la_CPPFLAGS =
 
-libepon_tr181_la_LDFLAGS= -lccsp_common -lhal_pon -lcm_mgnt
+libepon_tr181_la_LDFLAGS = -lccsp_common -lhal_pon -lcm_mgnt
 
-libepon_tr181_la_SOURCES= \
+libepon_tr181_la_SOURCES = \
     source/TR-181/plugin_main.c \
     source/TR-181/plugin_main_apis.c \
     source/TR-181/cosa_apis_epon_plugin.c \
