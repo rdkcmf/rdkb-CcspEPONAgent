@@ -377,7 +377,6 @@ int main(int argc, char* argv[])
         exit(1);
     }
    // rdk_logger_init("/fss/gw/lib/debug.ini");
-    syscfg_init();
     if (system("touch /tmp/epon_agent_initialized") == -1 )
     {
         EPONAGENTLOG(ERROR,"Failed to create /tmp/epon_agent_initialized file.\n");
