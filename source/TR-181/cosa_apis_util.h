@@ -238,8 +238,6 @@ int IPv4Addr_IsClassB(uint32_t addr);
 int IPv4Addr_IsClassC(uint32_t addr);
 int IPv4Addr_IsClassD(uint32_t addr);
 
-int vsystem(const char *fmt, ...);
-
 int get_if_hwaddr(const char *ifname, char *mac, size_t size);
 
 #endif
